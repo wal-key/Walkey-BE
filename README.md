@@ -93,92 +93,8 @@ walkey/
 #### `src/utils/`
 - 재사용 가능한 유틸리티 함수들
 
-## 🚀 설치 및 실행
 
-### 1. 의존성 설치
-
-```bash
-npm install
-```
-
-### 2. 환경 변수 설정
-
-`.env` 파일을 프로젝트 루트에 생성하고 다음 내용을 입력하세요:
-
-```env
-# Server Configuration
-PORT=3000
-NODE_ENV=development
-
-# Supabase Configuration
-SUPABASE_URL=your-supabase-project-url
-SUPABASE_ANON_KEY=your-supabase-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
-
-# Database Configuration (PostgreSQL via Supabase)
-DATABASE_URL=postgresql://postgres:your-password@db.your-project.supabase.co:5432/postgres
-
-# CORS Configuration
-ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
-
-# Kakao Map API (선택사항)
-KAKAO_API_KEY=your-kakao-api-key
-```
-
-### 3. Supabase 설정
-
-#### 3.1 Supabase 프로젝트 생성
-
-1. [Supabase](https://supabase.com)에 접속하여 로그인합니다.
-2. "New Project" 버튼을 클릭하여 새 프로젝트를 생성합니다.
-3. 프로젝트 이름, 데이터베이스 비밀번호, 지역을 설정합니다.
-
-#### 3.2 API 키 확인
-
-1. Supabase 대시보드에서 **Settings** > **API**로 이동합니다.
-2. 다음 정보를 복사하여 `.env` 파일에 입력합니다:
-   - **Project URL** → `SUPABASE_URL`
-   - **anon/public key** → `SUPABASE_ANON_KEY`
-   - **service_role key** → `SUPABASE_SERVICE_ROLE_KEY`
-
-#### 3.3 데이터베이스 연결 정보 확인
-
-1. **Settings** > **Database**로 이동합니다.
-2. **Connection String** > **URI** 탭에서 연결 문자열을 복사합니다.
-3. `[YOUR-PASSWORD]`를 실제 데이터베이스 비밀번호로 교체하여 `.env` 파일의 `DATABASE_URL`에 입력합니다.
-
-#### 3.4 데이터베이스 스키마 생성
-
-1. Supabase 대시보드에서 **SQL Editor**로 이동합니다.
-2. `database/schema.sql` 파일의 내용을 복사하여 붙여넣습니다.
-3. "Run" 버튼을 클릭하여 테이블을 생성합니다.
-
-### 4. 카카오맵 API 설정 (선택사항)
-
-#### 4.1 카카오 개발자 계정 생성
-
-1. [Kakao Developers](https://developers.kakao.com/)에 접속합니다.
-2. 카카오 계정으로 로그인합니다.
-
-#### 4.2 애플리케이션 등록
-
-1. "내 애플리케이션" 메뉴로 이동합니다.
-2. "애플리케이션 추가하기" 버튼을 클릭합니다.
-3. 앱 이름, 사업자명 등을 입력하고 저장합니다.
-
-#### 4.3 JavaScript 키 발급
-
-1. 생성한 애플리케이션을 선택합니다.
-2. "앱 키" 섹션에서 **JavaScript 키**를 복사합니다.
-3. `.env` 파일의 `KAKAO_API_KEY`에 입력합니다.
-
-#### 4.4 플랫폼 등록
-
-1. "플랫폼" 섹션으로 이동합니다.
-2. "Web 플랫폼 등록" 버튼을 클릭합니다.
-3. 사이트 도메인을 입력합니다 (예: `http://localhost:3000`).
-
-#### 4.5 프론트엔드에 API 키 적용
+#### 프론트엔드에 API 키 적용
 
 `public/index.html` 파일에서 다음 주석을 해제하고 API 키를 입력합니다:
 
@@ -290,17 +206,7 @@ npm start
 ### SSL 설정
 Supabase는 기본적으로 SSL을 사용합니다. `src/config/database.js`에서 SSL 설정이 활성화되어 있는지 확인하세요.
 
-## 📝 다음 단계
 
-1. **산책 루트 생성 API** 구현
-2. **카카오맵 API 통합** - 지도에 루트 표시
-3. **사용자 인증** - Supabase Auth 활용
-4. **루트 추천 알고리즘** 개발
-5. **커뮤니티 기능** 구현
-
-## 🤝 기여
-
-이 프로젝트는 산책 루트 추천 서비스를 위한 웹 애플리케이션입니다.
 
 ## 📄 라이선스
 
