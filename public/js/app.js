@@ -43,8 +43,11 @@ function showLoading(elementId) {
  * 데이터베이스 연결 테스트
  */
 async function testConnection() {
+    console.log('👆 연결 테스트 버튼 클릭됨');
+    alert('연결 테스트를 시작합니다!'); // 디버깅용 알림
     showLoading('connection-result');
     const data = await fetchAPI('/db/test');
+    console.log('📡 서버 응답:', data);
     displayResult('connection-result', data, data.success);
 }
 

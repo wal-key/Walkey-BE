@@ -1,5 +1,5 @@
-const { Pool } = require('pg');
-const config = require('../config');
+import { Pool } from 'pg';
+import config from './index';
 
 // PostgreSQL 연결 풀 생성
 const pool = new Pool({
@@ -18,4 +18,4 @@ pool.on('error', (err) => {
     console.error('❌ PostgreSQL 연결 오류:', err);
 });
 
-module.exports = pool;
+export default pool;

@@ -10,7 +10,7 @@ CREATE TABLE public.community_posts (
   created_at timestamp without time zone,
   CONSTRAINT community_posts_pkey PRIMARY KEY (post_id),
   CONSTRAINT community_posts_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.walk_sessions(session_id),
-  CONSTRAINT community_posts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user(user_id)
+  CONSTRAINT community_posts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id)
 );
 CREATE TABLE public.route_points (
   point_id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE public.themes (
   icon_url character varying,
   CONSTRAINT themes_pkey PRIMARY KEY (theme_id)
 );
-CREATE TABLE public.user (
+CREATE TABLE public.users (
   user_id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   email character varying,
@@ -59,6 +59,6 @@ CREATE TABLE public.walk_sessions (
   actual_duration bigint,
   is_liked boolean,
   CONSTRAINT walk_sessions_pkey PRIMARY KEY (session_id),
-  CONSTRAINT walk_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user(user_id),
+  CONSTRAINT walk_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id),
   CONSTRAINT walk_sessions_route_id_fkey FOREIGN KEY (route_id) REFERENCES public.walk_routes(route_id)
 );

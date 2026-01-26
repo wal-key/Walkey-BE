@@ -1,9 +1,11 @@
-const express = require('express');
+import express, { Request, Response } from 'express';
+import * as dbController from '../controllers/databaseController';
+import authRoutes from './authRoutes';
+
 const router = express.Router();
-const dbController = require('../controllers/databaseController');
 
 // 헬스 체크
-router.get('/health', (req, res) => {
+router.get('/health', (req: Request, res: Response) => {
     res.json({
         success: true,
         message: 'API 서버가 정상적으로 작동 중입니다.',
@@ -22,9 +24,7 @@ router.get('/routes', dbController.getRoutes);
 router.get('/sessions', dbController.getSessions);
 router.get('/posts', dbController.getPosts);
 
-const authRoutes = require('./authRoutes');
-
 // 인증 라우트
 router.use('/auth', authRoutes);
 
-module.exports = router;
+export default router;

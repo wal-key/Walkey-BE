@@ -1,10 +1,10 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const path = require('path');
-const config = require('./config');
-const routes = require('./routes');
-const { notFound, errorHandler } = require('./middleware/errorHandler');
+import express, { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import path from 'path';
+import config from './config';
+import routes from './routes';
+import { notFound, errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
@@ -15,6 +15,7 @@ app.use(
             directives: {
                 defaultSrc: ["'self'"],
                 scriptSrc: ["'self'", "'unsafe-inline'", "dapi.kakao.com", "*.kakao.com"],
+                scriptSrcAttr: ["'unsafe-inline'"],
                 imgSrc: ["'self'", "data:", "*.kakao.com", "*.daumcdn.net", "t1.daumcdn.net", "map.daumcdn.net"],
                 connectSrc: ["'self'", "*.kakao.com"],
             },
@@ -37,7 +38,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // 요청 로깅 (개발 환경)
 if (config.server.env === 'development') {
-    app.use((req, res, next) => {
+    app.use((req: Request, res: Response, next: NextFunction) => {
         console.log(`📝 ${req.method} ${req.path}`);
         next();
     });
@@ -47,7 +48,7 @@ if (config.server.env === 'development') {
 app.use('/api', routes);
 
 // Kakao Map API Key 제공 API
-app.get('/api/config/kakao', (req, res) => {
+app.get('/api/config/kakao', (req: Request, res: Response) => {
     res.json({
         success: true,
         apiKey: process.env.KAKAO_API_KEY
@@ -55,7 +56,7 @@ app.get('/api/config/kakao', (req, res) => {
 });
 
 // 루트 경로
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
     res.json({
         success: true,
         message: 'Walkey API 서버에 오신 것을 환영합니다! 🚶‍♂️',
@@ -69,4 +70,4 @@ app.use(notFound);
 // 전역 에러 핸들러
 app.use(errorHandler);
 
-module.exports = app;
+export default app;

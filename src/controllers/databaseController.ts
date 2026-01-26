@@ -1,9 +1,10 @@
-const pool = require('../config/database');
+import { Request, Response } from 'express';
+import pool from '../config/database';
 
 /**
  * 데이터베이스 연결 테스트
  */
-const testConnection = async (req, res) => {
+export const testConnection = async (req: Request, res: Response) => {
     try {
         const result = await pool.query('SELECT NOW() as current_time, version() as db_version');
         res.json({
@@ -14,7 +15,7 @@ const testConnection = async (req, res) => {
                 dbVersion: result.rows[0].db_version
             }
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('데이터베이스 연결 오류:', error);
         res.status(500).json({
             success: false,
@@ -27,7 +28,7 @@ const testConnection = async (req, res) => {
 /**
  * 모든 테이블 목록 조회
  */
-const getTables = async (req, res) => {
+export const getTables = async (req: Request, res: Response) => {
     try {
         const result = await pool.query(`
             SELECT table_name 
@@ -40,7 +41,7 @@ const getTables = async (req, res) => {
             message: '테이블 목록 조회 성공',
             data: result.rows
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('테이블 목록 조회 오류:', error);
         res.status(500).json({
             success: false,
@@ -53,16 +54,16 @@ const getTables = async (req, res) => {
 /**
  * 사용자 목록 조회
  */
-const getUsers = async (req, res) => {
+export const getUsers = async (req: Request, res: Response) => {
     try {
-        const result = await pool.query('SELECT * FROM "user" ORDER BY created_at DESC LIMIT 10');
+        const result = await pool.query('SELECT * FROM users ORDER BY created_at DESC LIMIT 10');
         res.json({
             success: true,
             message: '사용자 목록 조회 성공',
             data: result.rows,
             count: result.rowCount
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('사용자 조회 오류:', error);
         res.status(500).json({
             success: false,
@@ -75,7 +76,7 @@ const getUsers = async (req, res) => {
 /**
  * 테마 목록 조회
  */
-const getThemes = async (req, res) => {
+export const getThemes = async (req: Request, res: Response) => {
     try {
         const result = await pool.query('SELECT * FROM themes ORDER BY theme_id');
         res.json({
@@ -84,7 +85,7 @@ const getThemes = async (req, res) => {
             data: result.rows,
             count: result.rowCount
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('테마 조회 오류:', error);
         res.status(500).json({
             success: false,
@@ -97,7 +98,7 @@ const getThemes = async (req, res) => {
 /**
  * 산책 루트 목록 조회
  */
-const getRoutes = async (req, res) => {
+export const getRoutes = async (req: Request, res: Response) => {
     try {
         const result = await pool.query(`
             SELECT wr.*, t.theme_name, t.color_code
@@ -112,7 +113,7 @@ const getRoutes = async (req, res) => {
             data: result.rows,
             count: result.rowCount
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('산책 루트 조회 오류:', error);
         res.status(500).json({
             success: false,
@@ -125,12 +126,12 @@ const getRoutes = async (req, res) => {
 /**
  * 산책 세션 목록 조회
  */
-const getSessions = async (req, res) => {
+export const getSessions = async (req: Request, res: Response) => {
     try {
         const result = await pool.query(`
             SELECT ws.*, u.nickname, wr.route_name
             FROM walk_sessions ws
-            LEFT JOIN "user" u ON ws.user_id = u.user_id
+            LEFT JOIN users u ON ws.user_id = u.user_id
             LEFT JOIN walk_routes wr ON ws.route_id = wr.route_id
             ORDER BY ws.start_time DESC
             LIMIT 10
@@ -141,7 +142,7 @@ const getSessions = async (req, res) => {
             data: result.rows,
             count: result.rowCount
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('산책 세션 조회 오류:', error);
         res.status(500).json({
             success: false,
@@ -154,12 +155,12 @@ const getSessions = async (req, res) => {
 /**
  * 커뮤니티 게시글 목록 조회
  */
-const getPosts = async (req, res) => {
+export const getPosts = async (req: Request, res: Response) => {
     try {
         const result = await pool.query(`
             SELECT cp.*, u.nickname, ws.route_id
             FROM community_posts cp
-            LEFT JOIN "user" u ON cp.user_id = u.user_id
+            LEFT JOIN users u ON cp.user_id = u.user_id
             LEFT JOIN walk_sessions ws ON cp.session_id = ws.session_id
             ORDER BY cp.created_at DESC
             LIMIT 10
@@ -170,7 +171,7 @@ const getPosts = async (req, res) => {
             data: result.rows,
             count: result.rowCount
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('커뮤니티 게시글 조회 오류:', error);
         res.status(500).json({
             success: false,
@@ -178,14 +179,4 @@ const getPosts = async (req, res) => {
             error: error.message
         });
     }
-};
-
-module.exports = {
-    testConnection,
-    getTables,
-    getUsers,
-    getThemes,
-    getRoutes,
-    getSessions,
-    getPosts
 };

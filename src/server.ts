@@ -1,6 +1,6 @@
-const app = require('./app');
-const config = require('./config');
-const pool = require('./config/database');
+import app from './app';
+import config from './config';
+import pool from './config/database';
 
 const PORT = config.server.port;
 
@@ -17,7 +17,7 @@ const server = app.listen(PORT, async () => {
     try {
         await pool.query('SELECT NOW()');
         console.log('✅ 데이터베이스 연결 성공');
-    } catch (error) {
+    } catch (error: any) {
         console.error('❌ 데이터베이스 연결 실패:', error.message);
     }
 });

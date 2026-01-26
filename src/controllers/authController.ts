@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
-const config = require('../config');
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import User from '../models/userModel';
 
 // JWT 비밀키 (환경변수에서 가져오거나 기본값 사용)
 const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret_key_change_me';
@@ -10,7 +10,7 @@ class AuthController {
      * 로그인
      * POST /api/auth/login
      */
-    static async login(req, res, next) {
+    static async login(req: Request, res: Response, next: NextFunction) {
         try {
             const { email, password } = req.body;
 
@@ -32,8 +32,8 @@ class AuthController {
             }
 
             // 3. 비밀번호 검증
-            // 주의: user.password 컬럼명은 DB 스키마에 따름
-            const isMatch = await User.verifyPassword(password, user.password);
+            // 주의: user.password 컬럼명은 DB 스키마에 따름 (Note: users table might have password column, handled as string)
+            const isMatch = await User.verifyPassword(password, user.password as string);
             if (!isMatch) {
                 return res.status(401).json({
                     success: false,
@@ -69,4 +69,4 @@ class AuthController {
     }
 }
 
-module.exports = AuthController;
+export default AuthController;
