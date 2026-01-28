@@ -35,7 +35,7 @@ class AuthController {
 
         // 4. JWT 토큰 생성
         const token = jwt.sign(
-            { id: user.user_id, email: user.email },
+            { id: user.id, email: user.email },
             JWT_SECRET,
             { expiresIn: '24h' }
         );
@@ -44,10 +44,10 @@ class AuthController {
         return successResponse(res, 200, {
             token,
             user: {
-                id: user.user_id,
+                id: user.id,
                 email: user.email,
-                nickname: user.nickname,
-                avatar: user.avatar
+                username: user.username,
+                avatar_url: user.avatar_url
             }
         }, '로그인 성공');
     });

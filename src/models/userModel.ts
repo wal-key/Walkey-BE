@@ -1,4 +1,4 @@
-import pool from '../config/database';
+import prisma from '../lib/prisma';
 import bcrypt from 'bcrypt';
 
 class User {
@@ -7,27 +7,99 @@ class User {
      * @param {string} email 
      */
     static async findByEmail(email: string) {
-        const query = `
-            SELECT * FROM public."users"
-            WHERE email = $1
-        `;
-        const result = await pool.query(query, [email]);
-        return result.rows[0];
+        const result = await prisma.userInfo.findUnique({
+            where: { email },
+            include: { user: true }
+        });
+
+        if (!result) return null;
+
+        // Flatten the structure to match previous response
+        return {
+            ...result.user,
+            email: result.email,
+            password: result.password
+        };
     }
 
     /**
      * ID로 사용자 조회
-     * @param {number} userId 
+     * @param {string} userId 
      */
-    static async findById(userId: number | string) {
-        // userId can be string from JWT payload
-        const query = `
-            SELECT user_id, email, nickname, avatar
-            FROM public."users"
-            WHERE user_id = $1
-        `;
-        const result = await pool.query(query, [userId]);
-        return result.rows[0];
+    static async findById(userId: string) {
+        const result = await prisma.user.findUnique({
+            where: { id: userId },
+            include: { user_info: true }
+        });
+
+        if (!result) return null;
+
+        return {
+            id: result.id,
+            email: result.user_info?.email,
+            username: result.username,
+            avatar_url: result.avatar_url
+        };
+    }
+
+    /**
+     * 사용자명으로 사용자 조회
+     * @param {string} username 
+     */
+    static async findByUsername(username: string) {
+        const result = await prisma.user.findFirst({
+            where: { username },
+            include: { user_info: true }
+        });
+
+        if (!result) return null;
+
+        return {
+            id: result.id,
+            email: result.user_info?.email,
+            username: result.username,
+            avatar_url: result.avatar_url,
+            created_at: result.created_at
+        };
+    }
+
+    /**
+     * 사용자의 산책 세션 목록 조회
+     * @param {string} userId 
+     */
+    static async findSessionsByUserId(userId: string) {
+        return await prisma.session.findMany({
+            where: { user_id: userId },
+            include: { route: { select: { name: true } } },
+            orderBy: { start_time: 'desc' }
+        });
+    }
+
+    /**
+     * 새 사용자 생성 (회원가입)
+     * @param userData 
+     */
+    static async create(userData: { username: string, avatar_url: string, email: string, passwordHash: string }) {
+        const result = await prisma.user.create({
+            data: {
+                username: userData.username,
+                avatar_url: userData.avatar_url,
+                user_info: {
+                    create: {
+                        email: userData.email,
+                        password: userData.passwordHash
+                    }
+                }
+            },
+            include: { user_info: true }
+        });
+
+        return {
+            id: result.id,
+            username: result.username,
+            email: result.user_info?.email,
+            avatar_url: result.avatar_url
+        };
     }
 
     /**
@@ -36,9 +108,8 @@ class User {
      * @param {string} storedHash - 저장된 해시
      */
     static async verifyPassword(inputPassword: string, storedHash: string) {
-        // storedHash가 숫자인 경우 (bigint 타입 컬럼 오용 시) 처리 불가
-        if (typeof storedHash !== 'string') {
-            console.warn('⚠️ 저장된 비밀번호 해시가 문자열이 아닙니다. 스키마 타입을 확인하세요.');
+        if (!storedHash || typeof storedHash !== 'string') {
+            console.warn('⚠️ 저장된 비밀번호 해시가 유효하지 않습니다.');
             return false;
         }
         return await bcrypt.compare(inputPassword, storedHash);

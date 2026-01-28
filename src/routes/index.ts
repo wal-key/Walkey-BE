@@ -1,6 +1,10 @@
 import express, { Request, Response } from 'express';
-import * as dbController from '../controllers/databaseController';
+import dbController from '../controllers/databaseController';
 import authRoutes from './authRoutes';
+import userRoutes from './userRoutes';
+import themeRoutes from './themeRoutes';
+import routeRoutes from './routeRoutes';
+import adminRoutes from './adminRoutes';
 
 const router = express.Router();
 
@@ -15,16 +19,16 @@ router.get('/health', (req: Request, res: Response) => {
 
 // 데이터베이스 테스트 라우트
 router.get('/db/test', dbController.testConnection);
-router.get('/db/tables', dbController.getTables);
 
-// 각 테이블 조회 라우트
-router.get('/users', dbController.getUsers);
-router.get('/themes', dbController.getThemes);
-router.get('/routes', dbController.getRoutes);
-router.get('/sessions', dbController.getSessions);
-router.get('/posts', dbController.getPosts);
-
-// 인증 라우트
+// 주요 API 라우트
 router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
+router.use('/themes', themeRoutes);
+router.use('/routes', routeRoutes);
+router.use('/admin', adminRoutes);
+
+// 레거시 API (호환성을 위해 유지하거나 정리)
+router.get('/legacy/sessions', dbController.getSessions);
+router.get('/legacy/posts', dbController.getPosts);
 
 export default router;

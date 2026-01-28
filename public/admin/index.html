@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walkey Admin - Backend Backoffice</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dark-mode">
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shoe-prints"></i>
+                    <span>Walkey Admin</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active" data-section="dashboard">
+                        <i class="fas fa-chart-line"></i> 대시보드
+                    </li>
+                    <li data-section="themes">
+                        <i class="fas fa-palette"></i> 테마 관리
+                    </li>
+                    <li data-section="routes">
+                        <i class="fas fa-map-marked-alt"></i> 루트 관리
+                    </li>
+                    <li data-section="users">
+                        <i class="fas fa-users"></i> 사용자 관리
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>&copy; 2026 Walkey Team</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="검색어를 입력하세요...">
+                </div>
+                <div class="user-profile">
+                    <span class="admin-badge">Admin</span>
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin">
+                </div>
+            </header>
+
+            <div id="content-area">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="content-section active">
+                    <div class="section-header">
+                        <h1>대시보드</h1>
+                        <p>서비스 현황을 한눈에 파악하세요.</p>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-users"></i>
+                            <div class="stat-info">
+                                <h3>총 사용자</h3>
+                                <span id="stat-total-users" class="stat-value">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <div class="stat-info">
+                                <h3>총 루트</h3>
+                                <span id="stat-total-routes" class="stat-value">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-palette"></i>
+                            <div class="stat-info">
+                                <h3>등록 테마</h3>
+                                <span id="stat-total-themes" class="stat-value">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-walking"></i>
+                            <div class="stat-info">
+                                <h3>총 산책 수</h3>
+                                <span id="stat-total-sessions" class="stat-value">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Themes Section -->
+                <section id="themes" class="content-section">
+                    <div class="section-header">
+                        <div class="header-left">
+                            <h1>테마 관리</h1>
+                            <p>산책 루트의 카테고리를 관리합니다.</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="admin.showModal('theme-modal')">
+                            <i class="fas fa-plus"></i> 새 테마 추가
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="themes-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>아이콘</th>
+                                    <th>제목</th>
+                                    <th>색상</th>
+                                    <th>설명</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- JS Dynamic Injection -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Routes Section -->
+                <section id="routes" class="content-section">
+                    <div class="section-header">
+                        <div class="header-left">
+                            <h1>루트 관리</h1>
+                            <p>사용자들에게 제공되는 산책 루트를 관리합니다.</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="admin.showModal('route-modal')">
+                            <i class="fas fa-plus"></i> 새 루트 추가
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="routes-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>이미지</th>
+                                    <th>이름</th>
+                                    <th>거리</th>
+                                    <th>소요시간</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- JS Dynamic Injection -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Users Section -->
+                <section id="users" class="content-section">
+                    <div class="section-header">
+                        <div class="header-left">
+                            <h1>사용자 관리</h1>
+                            <p>등록된 회원 정보를 조회하고 관리합니다.</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="admin.showModal('user-modal')">
+                            <i class="fas fa-plus"></i> 새 사용자 추가
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="users-table">
+                            <thead>
+                                <tr>
+                                    <th>프로필</th>
+                                    <th>ID (UUID)</th>
+                                    <th>이름</th>
+                                    <th>가입일</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- JS Dynamic Injection -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>새 사용자 추가</h2>
+                <i class="fas fa-times close" onclick="admin.hideModal('user-modal')"></i>
+            </div>
+            <form id="user-form">
+                <div class="form-group">
+                    <label>사용자 이름</label>
+                    <input type="text" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label>이메일</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>비밀번호</label>
+                    <input type="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label>아바타 URL (선택)</label>
+                    <input type="text" name="avatar_url" placeholder="생략 시 자동 생성됩니다.">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="admin.hideModal('user-modal')">취소</button>
+                    <button type="submit" class="btn btn-primary">저장하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="theme-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>새 테마 추가</h2>
+                <i class="fas fa-times close" onclick="admin.hideModal('theme-modal')"></i>
+            </div>
+            <form id="theme-form">
+                <div class="form-group">
+                    <label>제목</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>설명</label>
+                    <textarea name="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>색상 코드 (HEX)</label>
+                    <div class="color-picker-group">
+                        <input type="text" name="color_code" value="#3498db" required>
+                        <input type="color" oninput="this.previousElementSibling.value = this.value">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>아이콘 URL</label>
+                    <input type="text" name="icon_url">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="admin.hideModal('theme-modal')">취소</button>
+                    <button type="submit" class="btn btn-primary">저장하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="route-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>새 루트 추가</h2>
+                <i class="fas fa-times close" onclick="admin.hideModal('route-modal')"></i>
+            </div>
+            <form id="route-form">
+                <div class="form-group">
+                    <label>루트 이름</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>테마 선택</label>
+                    <select name="theme_id" id="theme-select" required>
+                        <!-- Dynamic Injection -->
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>총 거리 (km)</label>
+                        <input type="number" step="0.1" name="total_distance" required>
+                    </div>
+                    <div class="form-group">
+                        <label>소요 시간 (예: 30분)</label>
+                        <input type="text" name="estimated_time" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>썸네일 URL</label>
+                    <input type="text" name="thumbnail_url">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="admin.hideModal('route-modal')">취소</button>
+                    <button type="submit" class="btn btn-primary">저장하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+
+</html>
