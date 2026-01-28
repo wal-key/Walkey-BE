@@ -1,0 +1,28 @@
+# 의존성 및 빌드 결과물
+node_modules/
+dist/
+build/
+out/
+# 패키지 매니저 락 파일 (자동 생성되므로 포맷팅 불필요)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+# 환경 변수 및 보안 파일
+.env
+.env.*
+*.pem
+# 로그 및 캐시
+logs/
+*.log
+npm-debug.log*
+.npm
+.cache/
+# 버전 관리 및 기타 설정
+.git/
+.svn/
+.vscode/
+.idea/
+# Prisma 가 생성한 파일이나 스키마 (필요한 경우)
+# prisma/migrations/
+# 정적 파일 또는 외부 라이브러리 (포맷팅을 원치 않는 경우)
+public/admin/vendor/
