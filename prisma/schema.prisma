@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime   @default(now()) @db.Timestamptz(6)
+  username   String
+  avatar_url String
+  user_info  UserInfo?
+  sessions   Session[]
+
+  @@map("users")
+}
+
+model UserInfo {
+  id         String   @id @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  email      String?  @unique
+  password   String?
+  user       User     @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@map("user_infos")
+}
+
+model Theme {
+  id          Int      @id @default(autoincrement())
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  title       String?
+  description String?
+  color_code  String?
+  icon_url    String?
+  routes      Route[]
+
+  @@map("themes")
+}
+
+model Route {
+  id             BigInt    @id @default(autoincrement())
+  theme_id       Int?
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+  name           String?
+  total_distance Float?    @db.Real
+  estimated_time String?
+  thumbnail_url  String?
+  paths          String[] // Postgres Text Array
+  theme          Theme?    @relation(fields: [theme_id], references: [id])
+  sessions       Session[]
+
+  @@map("routes")
+}
+
+model Session {
+  id              BigInt    @id @default(autoincrement())
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  user_id         String?   @db.Uuid
+  route_id        BigInt?
+  start_time      DateTime? @db.Timestamptz(6)
+  end_time        DateTime? @db.Timestamptz(6)
+  actual_distance Float?
+  actual_duration Float?
+  user            User?     @relation(fields: [user_id], references: [id])
+  route           Route?    @relation(fields: [route_id], references: [id])
+
+  @@map("sessions")
+}
