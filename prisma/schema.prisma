@@ -48,7 +48,7 @@ model Route {
   created_at     DateTime  @default(now()) @db.Timestamptz(6)
   name           String?
   total_distance Float?    @db.Real
-  estimated_time String?
+  estimated_time Float?
   thumbnail_url  String?
   paths          String[] // Postgres Text Array
   theme          Theme?    @relation(fields: [theme_id], references: [id])
