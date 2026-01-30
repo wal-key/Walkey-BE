@@ -10,24 +10,38 @@ const app = express();
 
 // 보안 헤더 설정
 app.use(
-    helmet({
-        contentSecurityPolicy: {
-            directives: {
-                defaultSrc: ["'self'"],
-                scriptSrc: ["'self'", "'unsafe-inline'", "dapi.kakao.com", "*.kakao.com"],
-                scriptSrcAttr: ["'unsafe-inline'"],
-                imgSrc: ["'self'", "data:", "*.kakao.com", "*.daumcdn.net", "t1.daumcdn.net", "map.daumcdn.net"],
-                connectSrc: ["'self'", "*.kakao.com"],
-            },
-        },
-    })
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          'dapi.kakao.com',
+          '*.kakao.com',
+        ],
+        scriptSrcAttr: ["'unsafe-inline'"],
+        imgSrc: [
+          "'self'",
+          'data:',
+          '*.kakao.com',
+          '*.daumcdn.net',
+          't1.daumcdn.net',
+          'map.daumcdn.net',
+        ],
+        connectSrc: ["'self'", '*.kakao.com'],
+      },
+    },
+  })
 );
 
 // CORS 설정
-app.use(cors({
+app.use(
+  cors({
     origin: config.cors.allowedOrigins,
     credentials: true,
-}));
+  })
+);
 
 // Body 파싱 미들웨어
 app.use(express.json());
@@ -38,10 +52,10 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // 요청 로깅 (개발 환경)
 if (config.server.env === 'development') {
-    app.use((req: Request, res: Response, next: NextFunction) => {
-        console.log(`📝 ${req.method} ${req.path}`);
-        next();
-    });
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    console.log(`📝 ${req.method} ${req.path}`);
+    next();
+  });
 }
 
 // API 라우트
@@ -49,19 +63,19 @@ app.use('/api', routes);
 
 // Kakao Map API Key 제공 API
 app.get('/api/config/kakao', (req: Request, res: Response) => {
-    res.json({
-        success: true,
-        apiKey: process.env.KAKAO_API_KEY
-    });
+  res.json({
+    success: true,
+    apiKey: process.env.KAKAO_API_KEY,
+  });
 });
 
 // 루트 경로
 app.get('/', (req: Request, res: Response) => {
-    res.json({
-        success: true,
-        message: 'Walkey API 서버에 오신 것을 환영합니다! 🚶‍♂️',
-        version: '1.0.0',
-    });
+  res.json({
+    success: true,
+    message: 'Walkey API 서버에 오신 것을 환영합니다! 🚶‍♂️',
+    version: '1.0.0',
+  });
 });
 
 // 404 에러 핸들러
