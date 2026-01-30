@@ -10,11 +10,11 @@ const router = express.Router();
 
 // 헬스 체크
 router.get('/health', (req: Request, res: Response) => {
-    res.json({
-        success: true,
-        message: 'API 서버가 정상적으로 작동 중입니다.',
-        timestamp: new Date().toISOString(),
-    });
+  res.json({
+    success: true,
+    message: 'API 서버가 정상적으로 작동 중입니다.',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // 데이터베이스 테스트 라우트

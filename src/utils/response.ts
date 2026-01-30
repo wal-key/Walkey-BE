@@ -6,11 +6,11 @@ export const errorResponse = (res: Response, statusCode: number, message: string
         message,
     };
 
-    if (errors) {
-        response.errors = errors;
-    }
+  if (errors) {
+    response.errors = errors;
+  }
 
-    return res.status(statusCode).json(response);
+  return res.status(statusCode).json(response);
 };
 
 // 성공 응답 포맷팅 유틸리티
