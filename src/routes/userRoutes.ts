@@ -10,6 +10,6 @@ router.post('/', UserController.signup);
 router.get('/:username', UserController.getUserByUsername);
 
 // 사용자의 산책 세션 목록 조회
-router.get('/:username/sessions', UserController.getUserSessions);
+router.get('/sessions/:username', UserController.getUserSessions);
 
 export default router;

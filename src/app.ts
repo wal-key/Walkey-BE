@@ -26,7 +26,7 @@ app.use(
 // CORS 설정
 app.use(cors({
     origin: config.cors.allowedOrigins,
-    credentials: true,
+    credentials: false,
 }));
 
 // Body 파싱 미들웨어
