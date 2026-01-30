@@ -5,7 +5,6 @@ export const errorResponse = (res: Response, statusCode: number, message: string
     const response: any = {
         success: false,
         message,
-        timestamp: new Date().toISOString(),
     };
 
     if (errors) {
@@ -21,6 +20,5 @@ export const successResponse = (res: Response, statusCode: number, data: any, me
         success: true,
         message,
         data,
-        timestamp: new Date().toISOString(),
     });
 };
