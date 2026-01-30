@@ -70,7 +70,7 @@ class User {
     static async findSessionsByUserId(userId: string) {
         return await prisma.session.findMany({
             where: { user_id: userId },
-            include: { route: { select: { name: true } } },
+            include: { route: { select: { total_distance: true, estimated_time: true, name: true } } },
             orderBy: { start_time: 'desc' }
         });
     }
