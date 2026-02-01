@@ -3,7 +3,7 @@ import UserController from '../controllers/userController';
 
 const router = express.Router();
 // 로그인
-router.post('/', UserController.signin);
+router.post('/signin', UserController.signin);
 
 /**
  * 회원가입, 및 기타 API 임시 주석처리
