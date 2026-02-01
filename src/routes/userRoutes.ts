@@ -2,11 +2,11 @@ import express from 'express';
 import UserController from '../controllers/userController';
 
 const router = express.Router();
+// 로그인
+router.post('/', UserController.signin);
 
 /**
  * 회원가입, 및 기타 API 임시 주석처리
-// 회원 가입
-router.post('/', UserController.signin);
 
 /**
  * 회원가입, 및 기타 API 임시 주석처리
