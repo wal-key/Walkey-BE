@@ -45,6 +45,9 @@ class UserController {
     return successResponse(res, 200, formattedSessions, '산책 내역 조회 성공');
   });
 
+  //로그임
+  static signin = asyncHandler(async (req: Request, res: Response) => {});
+
   /**
    * 회원 가입
    */
