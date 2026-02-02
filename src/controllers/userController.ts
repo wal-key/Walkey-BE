@@ -12,10 +12,20 @@ class UserController {
   static getUserByUsername = asyncHandler(
     async (req: Request, res: Response) => {
       const username = req.params.username as string;
+
+      // 요청 형식 검증
+      if (!username || username.trim() === '') {
+        return errorResponse(
+          res,
+          400,
+          '요청을 처리할 수 없습니다. 요청 형식이 올바르지 않습니다.'
+        );
+      }
+
       const user = await User.findByUsername(username);
 
       if (!user) {
-        return errorResponse(res, 404, '사용자를 찾을 수 없습니다.');
+        return errorResponse(res, 404, '요청하신 사용자를 찾을 수 없습니다');
       }
 
       return successResponse(res, 200, user, '사용자 조회 성공');
