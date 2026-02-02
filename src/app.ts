@@ -1,3 +1,4 @@
+import './utils/bigInt';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -19,6 +20,15 @@ app.use(
           "'unsafe-inline'",
           'dapi.kakao.com',
           '*.kakao.com',
+          't1.daumcdn.net',
+        ],
+        scriptSrcElem: [
+          // ⭐ 이게 핵심
+          "'self'",
+          "'unsafe-inline'",
+          'dapi.kakao.com',
+          '*.kakao.com',
+          't1.daumcdn.net',
         ],
         scriptSrcAttr: ["'unsafe-inline'"],
         imgSrc: [
