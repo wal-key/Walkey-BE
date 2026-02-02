@@ -57,6 +57,10 @@ class UserController {
     const userInfo = await prisma.userInfo.findUnique({
       where: { email },
     });
+    if (!userInfo) {
+      errorResponse(res, 404, '회원정보가 잘못 되었습니다.');
+      return;
+    }
     //비번 검증
     if (!password || password !== userInfo?.password) {
       errorResponse(res, 400, '아이디 또는 비밀번호가 올바르지 않습니다.');
