@@ -62,7 +62,7 @@ class AdminController {
     } = req.body;
     const result = await prisma.route.create({
       data: {
-        theme_id: theme_id ? parseInt(theme_id) : null,
+        theme_id: theme_id,
         name,
         total_distance: total_distance,
         estimated_time,
