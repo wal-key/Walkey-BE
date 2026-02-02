@@ -50,7 +50,7 @@ model Route {
   total_distance Int
   estimated_time Int
   thumbnail_url  String
-  paths          String[]      // PostgreSQL ARRAY 타입
+  paths          String[]      // PostgreSQL ARRAY 타입ㅋ
   theme          Theme    @relation(fields: [theme_id], references: [id])
   sessions       Session[]
 
@@ -61,13 +61,13 @@ model Session {
   id              BigInt    @id @default(autoincrement())
   created_at      DateTime  @default(now()) @db.Timestamptz(6)
   user_id         String?   @db.Uuid
-  route_id        BigInt?
+  route_id        BigInt
   start_time      DateTime? @db.Timestamptz(6)
   end_time        DateTime? @db.Timestamptz(6)
-  actual_distance Float?
-  actual_duration Float?
+  actual_distance Float     @default(0.0)
+  actual_duration Float     @default(0.0)
   user            User?     @relation(fields: [user_id], references: [id])
-  route           Route?    @relation(fields: [route_id], references: [id])
+  route           Route    @relation(fields: [route_id], references: [id])
 
   @@map("sessions")
 }
