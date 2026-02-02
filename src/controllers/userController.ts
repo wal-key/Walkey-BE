@@ -35,6 +35,20 @@ class UserController {
 
     const sessions = await User.findSessionsByUserId(user.id);
 
+    let actualDistance = 0,
+      actualDuration = 0,
+      totalDistance = 0,
+      totalDuration = 0;
+
+    for (let s of sessions) {
+      const { actual_distance, actual_duration } = s;
+      const { total_distance, estimated_time } = s.route;
+      actualDistance += actual_distance;
+      actualDuration += actual_duration;
+      totalDistance += total_distance;
+      totalDuration += estimated_time;
+    }
+
     // Convert BigInt IDs to string for JSON serialization
     const formattedSessions = sessions.map((s: any) => ({
       ...s,
@@ -42,7 +56,20 @@ class UserController {
       route_id: s.route_id?.toString(),
     }));
 
-    return successResponse(res, 200, formattedSessions, '산책 내역 조회 성공');
+    return successResponse(
+      res,
+      200,
+      {
+        session_info: {
+          total_distance: totalDistance,
+          total_duration: totalDuration,
+          actual_distance: actualDuration,
+          actual_duration: actualDuration,
+        },
+        ...formattedSessions,
+      },
+      '산책 내역 조회 성공'
+    );
   });
 
   //로그임

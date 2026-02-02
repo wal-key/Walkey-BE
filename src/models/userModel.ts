@@ -63,17 +63,17 @@ class User {
     };
   }
 
-  /**
-   * 사용자의 산책 세션 목록 조회
-   * @param {string} userId
-   */
-  static async findSessionsByUserId(userId: string) {
-    return await prisma.session.findMany({
-      where: { user_id: userId },
-      include: { route: { select: { name: true } } },
-      orderBy: { start_time: 'desc' },
-    });
-  }
+    /**
+     * 사용자의 산책 세션 목록 조회
+     * @param {string} userId 
+     */
+    static async findSessionsByUserId(userId: string) {
+        return await prisma.session.findMany({
+            where: { user_id: userId },
+            include: { route: { select: { total_distance: true, estimated_time: true, name: true } } },
+            orderBy: { start_time: 'desc' }
+        });
+    }
 
   /**
    * 새 사용자 생성 (회원가입)
