@@ -64,7 +64,7 @@ class AdminController {
       data: {
         theme_id: theme_id ? parseInt(theme_id) : null,
         name,
-        total_distance: total_distance ? parseFloat(total_distance) : null,
+        total_distance: total_distance,
         estimated_time,
         thumbnail_url,
         paths: paths || [],
