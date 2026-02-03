@@ -14,7 +14,7 @@ export class RouteModel {
         theme_id: theme,
         estimated_time: {
           gte: time,
-          lte: time + 20,
+          lte: time + 10,
         },
       },
       select: {
@@ -31,6 +31,4 @@ export class RouteModel {
 
     return result;
   }
-
-  static async createSession(theme: number, time: number) {}
 }
