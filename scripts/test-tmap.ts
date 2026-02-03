@@ -1,8 +1,6 @@
 // scripts/test-tmap.ts
 import axios from 'axios';
 
-const TMAP_API_KEY = 'ZoyBZmIwmE9V8EqTgwC1F90SRqycW76u5CflUhUK';
-
 async function testTmapAPI() {
   try {
     console.log('🧪 Tmap API 테스트 시작...\n');
@@ -21,7 +19,7 @@ async function testTmapAPI() {
       },
       {
         headers: {
-          appKey: TMAP_API_KEY,
+          appKey: process.env.TMAP_API_KEY,
           'Content-Type': 'application/json',
         },
       }
