@@ -82,6 +82,35 @@ class UserController {
     );
   });
 
+  //로그임
+  static signin = asyncHandler(async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    //검증 절차
+    //이메일 검증
+    if (!email || typeof email !== 'string') {
+      errorResponse(res, 400, '아이디 또는 비밀번호가 올바르지 않습니다.');
+      return;
+    }
+    const userInfo = await prisma.userInfo.findUnique({
+      where: { email },
+    });
+    if (!userInfo) {
+      errorResponse(res, 404, '회원정보가 잘못 되었습니다.');
+      return;
+    }
+    //비번 검증
+    if (!password || password !== userInfo?.password) {
+      errorResponse(res, 400, '아이디 또는 비밀번호가 올바르지 않습니다.');
+      return;
+    }
+
+    successResponse(
+      res,
+      200,
+      `${userInfo?.email}님 성공적으로 로그인되었습니다.`
+    );
+  });
+
   /**
    * 회원 가입
    */
