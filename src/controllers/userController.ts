@@ -4,6 +4,7 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse, errorResponse } from '../utils/response';
 import User from '../models/userModel';
 import bcrypt from 'bcrypt';
+import { validate as uuidValidate } from 'uuid';
 
 class UserController {
   /**
@@ -12,9 +13,19 @@ class UserController {
   static createUserSession = asyncHandler(
     async (req: Request, res: Response) => {
       const { user_id, route_id } = req.body;
-      if (!user_id || !route_id) {
+      if (!user_id || !route_id || !uuidValidate(user_id)) {
         errorResponse(res, 400, '필수 요청 값이 누락되었습니다.');
         return;
+      }
+
+      const validUser = await prisma.user.findUnique({
+        where: {
+          id: user_id,
+        },
+      });
+
+      if (!validUser) {
+        return errorResponse(res, 404, '존재하지 않는 사용자 입니다.');
       }
 
       const hasSession = await prisma.session.findFirst({
