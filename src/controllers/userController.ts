@@ -4,8 +4,56 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse, errorResponse } from '../utils/response';
 import User from '../models/userModel';
 import bcrypt from 'bcrypt';
+import { validate as uuidValidate } from 'uuid';
 
 class UserController {
+  /**
+   * 사용자 세션 생성
+   */
+  static createUserSession = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { user_id, route_id } = req.body;
+      if (!user_id || !route_id || !uuidValidate(user_id)) {
+        errorResponse(res, 400, '필수 요청 값이 누락되었습니다.');
+        return;
+      }
+
+      const validUser = await prisma.user.findUnique({
+        where: {
+          id: user_id,
+        },
+      });
+
+      if (!validUser) {
+        return errorResponse(res, 404, '존재하지 않는 사용자 입니다.');
+      }
+
+      const hasSession = await prisma.session.findFirst({
+        where: {
+          user_id: user_id,
+          end_time: {
+            equals: null,
+          },
+        },
+      });
+
+      if (hasSession) {
+        return errorResponse(res, 409, '사용자 세션이 이미 존재합니다.');
+      } else {
+        const session = await prisma.session.create({
+          data: {
+            user_id,
+            route_id,
+          },
+        });
+        if (session) {
+          successResponse(res, 201, session, '정상적으로 생성되었습니다.');
+          return;
+        }
+      }
+    }
+  );
+
   /**
    * 사용자 정보 조회
    */
@@ -82,7 +130,7 @@ class UserController {
     );
   });
 
-  //로그임
+  //로그인
   static signin = asyncHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
     //검증 절차
