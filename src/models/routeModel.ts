@@ -24,11 +24,30 @@ export class RouteModel {
         total_distance: true,
         thumbnail_url: true,
         paths: true,
+        detail_paths: true,
       },
     });
 
     if (!result.length) return [];
 
     return result;
+  }
+
+  /**
+   *
+   * @param {Number} routeId
+   * @param {object} detailPaths
+   */
+  static async updateDetailPaths(routeId: number, detailPaths: []) {
+    const save = await prisma.route.update({
+      where: {
+        id: routeId,
+      },
+      data: {
+        detail_paths: JSON.stringify(detailPaths),
+      },
+    });
+
+    return save;
   }
 }
