@@ -13,23 +13,34 @@ export class RouteService {
         Math.abs(a.estimated_time - time) - Math.abs(b.estimated_time - time)
     );
 
-    await this.createDetailPaths(routes.id, sorted);
+    const parsedSorted = sorted.map((route) => ({
+      ...route,
+      paths: RouteService.parsePathStrings(route.paths),
+    }));
+
+    await this.createDetailPaths(sorted);
 
     // 최대 4개 반환
-    return sorted.slice(0, 4);
+    return parsedSorted.slice(0, 4);
   }
 
   /**
    * detailpath가 없는 경로들에 대해 Tmap API 호출 및 업데이트
-   * @param {number} routeId
    * @param {any} routes
    */
-  private static async createDetailPaths(routeId: number, routes: any[]) {
+  private static async createDetailPaths(routes: any[]) {
     for (const [index, route] of routes.entries()) {
+      if (route.detail_paths && route.detail_paths.length > 0) {
+        continue;
+      }
+
       const points = this.parsePathStrings(route.paths);
+      const routeId = route.id;
 
       try {
         const tmapDetailPaths = await TmapClient.getPedestrianRoute(points);
+
+        await RouteModel.updateDetailPaths(routeId, tmapDetailPaths);
       } catch (error) {
         console.log(`${index}번 경로 Tmap 처리 실패`, error);
       }

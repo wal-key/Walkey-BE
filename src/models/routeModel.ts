@@ -38,13 +38,13 @@ export class RouteModel {
    * @param {Number} routeId
    * @param {object} detailPaths
    */
-  static async updateDetailPaths(routeId: number, detailPaths: []) {
+  static async updateDetailPaths(routeId: number, detailPaths: any) {
     const save = await prisma.route.update({
       where: {
         id: routeId,
       },
       data: {
-        detail_paths: JSON.stringify(detailPaths),
+        detail_paths: detailPaths,
       },
     });
 

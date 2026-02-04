@@ -52,7 +52,7 @@ model Route {
   estimated_time Int
   thumbnail_url  String
   paths          String[]      // PostgreSQL ARRAY 타입
-  detail_paths   String[]      // PostgreSQL ARRAY 타입
+  detail_paths   Json?      // PostgreSQL ARRAY 타입
   theme          Theme    @relation(fields: [theme_id], references: [id])
   sessions       Session[]
 

@@ -12,28 +12,32 @@ export class TmapClient {
    * 중복 좌표를 제거하여 하나의 경로로 합쳐 반환한다.
    * @param {LatLng} points
    */
-  // static async getPedestrianRoute(points: LatLng[]) {
-  //   const segments: LatLng[][] = [];
-  //
-  //   for (let i = 0; i < points.length - 1; i++) {
-  //     const segment = await this.callTmap(points[i], points[i + 1]);
-  //     segments.push(segment);
-  //   }
-  //
-  //   console.log('두번째', segments);
-  //
-  //   return this.mergeSegments(segments);
-  // }
   static async getPedestrianRoute(points: LatLng[]) {
     const detailPath = [];
+
+    if (!Array.isArray(points) || points.length < 2) {
+      throw new Error('points 배열이 2개 이상의 LatLng 객체를 반환해야합니다.');
+    }
+
+    for (const p of points) {
+      if (
+        typeof p.lat !== 'number' ||
+        typeof p.lng !== 'number' ||
+        isNaN(p.lat) ||
+        isNaN(p.lng)
+      ) {
+        throw new Error(`올바르지 않은 LatLng 좌표: ${JSON.stringify(p)}`);
+      }
+    }
 
     for (let i = 0; i < points.length - 1; i++) {
       detailPath.push(points[i]);
 
       const segments = await this.callTmap(points[i], points[i + 1]);
 
+      const middlePoints = segments.length > 2 ? segments.slice(1, -1) : [];
       // 중복 좌표 제거
-      for (const point of segments.slice(1, -1)) {
+      for (const point of middlePoints) {
         const lastPoint = detailPath[detailPath.length - 1];
         if (!(lastPoint.lat === point.lat && lastPoint.lng === point.lng)) {
           detailPath.push(point);
@@ -80,19 +84,4 @@ export class TmapClient {
         }))
       );
   }
-
-  /**
-   * 여러 경로 세그먼트를 하나의 경로로 병합.
-   * @param {LatLng} segments
-   */
-  // private static mergeSegments(segments: LatLng[][]): LatLng[] {
-  //   const merged: LatLng[] = [];
-  //
-  //   segments.forEach((segment, index) => {
-  //     if (index === 0) merged.push(...segment);
-  //     else merged.push(...segment.slice(1)); // 중복 제거
-  //   });
-  //
-  //   return merged;
-  // }
 }
