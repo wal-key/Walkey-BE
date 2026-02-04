@@ -32,7 +32,8 @@
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.11.3",
     "postgres": "^3.4.8",
-    "supabase": "^2.72.8"
+    "supabase": "^2.72.8",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.3.1",
