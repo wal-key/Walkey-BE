@@ -7,6 +7,43 @@ import bcrypt from 'bcrypt';
 
 class UserController {
   /**
+   * 사용자 세션 생성
+   */
+  static createUserSession = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { user_id, route_id } = req.body;
+      if (!user_id || !route_id) {
+        errorResponse(res, 400, '필수 요청 값이 누락되었습니다.');
+        return;
+      }
+
+      const hasSession = await prisma.session.findFirst({
+        where: {
+          user_id: user_id,
+          end_time: {
+            equals: null,
+          },
+        },
+      });
+
+      if (hasSession) {
+        return errorResponse(res, 409, '사용자 세션이 이미 존재합니다.');
+      } else {
+        const session = await prisma.session.create({
+          data: {
+            user_id,
+            route_id,
+          },
+        });
+        if (session) {
+          successResponse(res, 201, session, '정상적으로 생성되었습니다.');
+          return;
+        }
+      }
+    }
+  );
+
+  /**
    * 사용자 정보 조회
    */
   static getUserByUsername = asyncHandler(
@@ -82,7 +119,7 @@ class UserController {
     );
   });
 
-  //로그임
+  //로그인
   static signin = asyncHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
     //검증 절차
