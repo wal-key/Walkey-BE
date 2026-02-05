@@ -42,6 +42,7 @@ model Theme {
   @@map("themes")
 }
 
+
 model Route {
   id             BigInt    @id @default(autoincrement())
   theme_id       Int
@@ -50,7 +51,8 @@ model Route {
   total_distance Int
   estimated_time Int
   thumbnail_url  String
-  paths          String[]      // PostgreSQL ARRAY 타입ㅋ
+  paths          String[]      // PostgreSQL ARRAY 타입
+  detail_paths   Json?      // PostgreSQL ARRAY 타입
   theme          Theme    @relation(fields: [theme_id], references: [id])
   sessions       Session[]
 

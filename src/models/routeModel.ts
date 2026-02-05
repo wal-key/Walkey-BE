@@ -14,7 +14,7 @@ export class RouteModel {
         theme_id: theme,
         estimated_time: {
           gte: time,
-          lte: time + 20,
+          lte: time + 10,
         },
       },
       select: {
@@ -24,6 +24,7 @@ export class RouteModel {
         total_distance: true,
         thumbnail_url: true,
         paths: true,
+        detail_paths: true,
       },
     });
 
@@ -32,5 +33,21 @@ export class RouteModel {
     return result;
   }
 
-  static async createSession(theme: number, time: number) {}
+  /**
+   *
+   * @param {Number} routeId
+   * @param {object} detailPaths
+   */
+  static async updateDetailPaths(routeId: number, detailPaths: any) {
+    const save = await prisma.route.update({
+      where: {
+        id: routeId,
+      },
+      data: {
+        detail_paths: detailPaths,
+      },
+    });
+
+    return save;
+  }
 }
