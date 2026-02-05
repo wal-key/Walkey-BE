@@ -2,7 +2,7 @@
   "name": "walkey-backend",
   "version": "1.0.0",
   "description": "Walking route recommendation backend service",
-  "main": "src/server.js",
+  "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
