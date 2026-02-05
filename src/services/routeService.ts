@@ -2,15 +2,16 @@ import { RouteModel } from '../models/routeModel';
 import { TmapClient } from '../clients/tmapClient';
 
 export class RouteService {
-  static async getRecommendedRoutes(theme: number, time: number) {
-    const routes = await RouteModel.findRoutesByFilter(theme, time);
+  static async getRecommendedRoutes(themeId: number, walkTime: number) {
+    const routes = await RouteModel.findRoutesByFilter(themeId, walkTime);
 
     if (!routes.length) return [];
 
     // 시간이 가장 가까운 순으로 계산
     const sorted = routes.sort(
       (a, b) =>
-        Math.abs(a.estimated_time - time) - Math.abs(b.estimated_time - time)
+        Math.abs(a.estimated_time - walkTime) -
+        Math.abs(b.estimated_time - walkTime)
     );
 
     const parsedSorted = sorted.map((route) => ({
