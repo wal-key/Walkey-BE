@@ -8,6 +8,12 @@ import { successResponse, errorResponse } from '../utils/response';
 const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret_key_change_me';
 
 class AuthController {
+  static githubLogin = asyncHandler(async (req: Request, res: Response) => {
+    const { code } = req.query;
+    console.log('authorization code: ', code);
+    successResponse(res, 200, `엑세스 코드: ${code}`);
+  });
+
   /**
    * 로그인
    * POST /api/auth/login

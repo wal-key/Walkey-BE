@@ -21,6 +21,7 @@ app.use(
           'dapi.kakao.com',
           '*.kakao.com',
           't1.daumcdn.net',
+          'github.com',
         ],
         scriptSrcElem: [
           // ⭐ 이게 핵심
@@ -29,6 +30,7 @@ app.use(
           'dapi.kakao.com',
           '*.kakao.com',
           't1.daumcdn.net',
+          'github.com',
         ],
         scriptSrcAttr: ["'unsafe-inline'"],
         imgSrc: [
@@ -39,7 +41,7 @@ app.use(
           't1.daumcdn.net',
           'map.daumcdn.net',
         ],
-        connectSrc: ["'self'", '*.kakao.com'],
+        connectSrc: ["'self'", '*.kakao.com', 'github.com'],
       },
     },
   })
