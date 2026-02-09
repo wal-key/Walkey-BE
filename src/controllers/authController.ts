@@ -32,36 +32,66 @@ class AuthController {
 
     const { access_token } = authData as { access_token: string };
 
-    const userRes = await fetch('https://api.github.com/user', {
+    const githubUserRes = await fetch('https://api.github.com/user', {
       method: 'GET',
       headers: {
         Authorization: 'Bearer ' + access_token,
       },
     });
 
-    const socialLoginData = (await userRes.json()) as {
+    const socialLoginData = (await githubUserRes.json()) as {
       name: string;
       id: number;
       avatar_url: string;
     };
     const { name, avatar_url, id: provider_id } = socialLoginData;
 
-    const { data: userData, error: userDataError } = await supabase
-      .from('users')
-      .upsert(
-        {
-          username: name,
-          avatar_url: avatar_url,
-          provider_id,
-          provider_name: 'github',
-        },
-        { onConflict: 'provider_id' }
-      )
-      .select('*')
+    const { data: exist } = await supabase
+      .from('social_users')
+      .select('user_id, id')
+      .eq('provider_id', provider_id)
+      .eq('provider_name', 'github')
       .single();
 
-    if (userDataError) {
-      return errorResponse(res, 500, userDataError.message);
+    let userRes;
+    if (exist) {
+      userRes = await supabase
+        .from('users')
+        .upsert({
+          id: exist.user_id,
+          username: name,
+          avatar_url: avatar_url,
+        })
+        .select()
+        .single();
+    } else {
+      userRes = await supabase
+        .from('users')
+        .insert({
+          username: name,
+          avatar_url: avatar_url,
+        })
+        .select()
+        .single();
+    }
+
+    const { data: userData, error: userError } = userRes;
+
+    if (userError) {
+      return errorResponse(res, 500, userError.message);
+    }
+
+    const { error: socialError } = await supabase.from('social_users').upsert(
+      {
+        user_id: userData.id,
+        provider_id,
+        provider_name: 'github',
+      },
+      { onConflict: 'provider_id' }
+    );
+
+    if (socialError) {
+      return errorResponse(res, 500, socialError.message);
     }
 
     const { error: userInfoError } = await supabase
@@ -74,7 +104,7 @@ class AuthController {
 
     const accessToken = jwt.sign(
       {
-        username: name,
+        username: userData.username,
         id: userData.id,
       },
       JWT_SECRET,
