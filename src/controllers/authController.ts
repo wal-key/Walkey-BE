@@ -5,7 +5,6 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse, errorResponse } from '../utils/response';
 import { supabase } from '../config/supabase';
 import 'dotenv/config';
-import prisma from '../lib/prisma';
 
 // JWT 비밀키 (환경변수에서 가져오거나 기본값 사용)
 const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret_key_change_me';
