@@ -3,15 +3,86 @@ import jwt from 'jsonwebtoken';
 import User from '../models/userModel';
 import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse, errorResponse } from '../utils/response';
+import { supabase } from '../config/supabase';
+import 'dotenv/config';
+import prisma from '../lib/prisma';
 
 // JWT 비밀키 (환경변수에서 가져오거나 기본값 사용)
 const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret_key_change_me';
+const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
 
 class AuthController {
   static githubLogin = asyncHandler(async (req: Request, res: Response) => {
     const { code } = req.query;
-    console.log('authorization code: ', code);
-    successResponse(res, 200, `엑세스 코드: ${code}`);
+    const params = {
+      client_id: process.env.AUTH_GITHUB_CLIENT_ID,
+      client_secret: process.env.AUTH_GITHUB_SECRET,
+      code: code,
+    };
+
+    const authRes = await fetch(`https://github.com/login/oauth/access_token`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    });
+
+    const authData = await authRes.json();
+
+    const { access_token } = authData as { access_token: string };
+
+    const userRes = await fetch('https://api.github.com/user', {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + access_token,
+      },
+    });
+
+    const socialLoginData = (await userRes.json()) as {
+      name: string;
+      id: number;
+      avatar_url: string;
+    };
+    const { name, avatar_url, id: provider_id } = socialLoginData;
+
+    const { data: userData, error: userDataError } = await supabase
+      .from('users')
+      .upsert({ username: name, avatar_url: avatar_url })
+      .select('*')
+      .single();
+
+    if (userDataError) {
+      return errorResponse(res, 500, userDataError.message);
+    }
+
+    const { error: userInfoError } = await supabase
+      .from('user_infos')
+      .upsert({ id: userData.id, provider_name: 'github', provider_id });
+
+    if (userInfoError) {
+      return errorResponse(res, 500, userInfoError.message);
+    }
+
+    const username = 'jhlee';
+
+    const accessToken = jwt.sign(
+      {
+        username,
+        id: userData.id,
+      },
+      JWT_SECRET,
+      {
+        issuer: 'walkey',
+        expiresIn: ONE_WEEK,
+      }
+    );
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+    });
+
+    successResponse(res, 200, '성공적으로 로그인 되었습니다.');
   });
 
   /**
