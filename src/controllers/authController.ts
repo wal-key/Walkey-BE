@@ -49,7 +49,15 @@ class AuthController {
 
     const { data: userData, error: userDataError } = await supabase
       .from('users')
-      .upsert({ username: name, avatar_url: avatar_url })
+      .upsert(
+        {
+          username: name,
+          avatar_url: avatar_url,
+          provider_id,
+          provider_name: 'github',
+        },
+        { onConflict: 'provider_id' }
+      )
       .select('*')
       .single();
 
@@ -59,17 +67,15 @@ class AuthController {
 
     const { error: userInfoError } = await supabase
       .from('user_infos')
-      .upsert({ id: userData.id, provider_name: 'github', provider_id });
+      .upsert({ id: userData.id });
 
     if (userInfoError) {
       return errorResponse(res, 500, userInfoError.message);
     }
 
-    const username = 'jhlee';
-
     const accessToken = jwt.sign(
       {
-        username,
+        username: name,
         id: userData.id,
       },
       JWT_SECRET,
@@ -78,7 +84,7 @@ class AuthController {
         expiresIn: ONE_WEEK,
       }
     );
-    res.cookie('access_token', accessToken, {
+    res.cookie('walkey_access_token', accessToken, {
       httpOnly: true,
     });
 
