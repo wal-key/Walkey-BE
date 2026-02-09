@@ -6,5 +6,6 @@ const router = express.Router();
 // 로그인
 router.post('/login', AuthController.login);
 router.get('/login/github', AuthController.githubLogin);
+router.get('/login/naver', AuthController.naverLogin);
 
 export default router;
