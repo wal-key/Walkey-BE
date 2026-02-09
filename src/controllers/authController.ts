@@ -11,6 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret_key_change_me';
 const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
 
 class AuthController {
+  static googleLogin = asyncHandler(async (req: Request, res: Response) => {});
   static githubLogin = asyncHandler(async (req: Request, res: Response) => {
     const { code } = req.query;
     const params = {
