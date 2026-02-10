@@ -10,5 +10,5 @@ export const supabase = createClient(
 // 관리자 권한이 필요한 작업을 위한 클라이언트
 export const supabaseAdmin = createClient(
   config.supabase.url,
-  config.supabase.serviceRoleKey || '' // Fallback required for TS strict mode if key is undefined
+  config.supabase.serviceRoleKey // Fallback required for TS strict mode if key is undefined
 );
