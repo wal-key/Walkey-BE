@@ -15,7 +15,6 @@ type AuthType = 'authentication' | 'authorization' | 'signin';
 class AuthController {
   static googleSignin = asyncHandler(async (req: Request, res: Response) => {
     const { code } = req.query;
-    console.log('code=', code);
 
     const params = {
       client_id: process.env.AUTH_GOOGLE_CLIENT_ID,
@@ -42,7 +41,7 @@ class AuthController {
     }
 
     const { access_token } = authData as { access_token: string };
-    console.log('access-token:', access_token);
+
     const googleUserRes = await fetch(
       'https://www.googleapis.com/oauth2/v3/userinfo',
       {
