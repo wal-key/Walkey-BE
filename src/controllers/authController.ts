@@ -49,7 +49,7 @@ class AuthController {
     const { data: exist } = await supabase
       .from('social_users')
       .select('user_id, id')
-      .eq('provider_id', provider_id)
+      .eq('provider_id', provider_id.toString())
       .eq('provider_name', 'github')
       .single();
 
@@ -84,7 +84,7 @@ class AuthController {
     const { error: socialError } = await supabase.from('social_users').upsert(
       {
         user_id: userData.id,
-        provider_id,
+        provider_id: provider_id.toString(),
         provider_name: 'github',
       },
       { onConflict: 'provider_id' }
