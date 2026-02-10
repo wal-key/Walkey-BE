@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel';
+import axios from 'axios';
 import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse, errorResponse } from '../utils/response';
 import { supabase } from '../config/supabase';
-import 'dotenv/config';
 
 // JWT 비밀키 (환경변수에서 가져오거나 기본값 사용)
 const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret_key_change_me';
@@ -136,7 +136,12 @@ class AuthController {
   });
 
   static githubLogin = asyncHandler(async (req: Request, res: Response) => {
-    const { code } = req.query;
+    const { code, state } = req.query;
+
+    if (!code || !state) {
+      return errorResponse(res, 400, 'code와 state가 필요합니다.');
+    }
+
     const params = {
       client_id: process.env.AUTH_GITHUB_CLIENT_ID,
       client_secret: process.env.AUTH_GITHUB_SECRET,
