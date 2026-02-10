@@ -12,7 +12,12 @@ const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
 
 class AuthController {
   static githubLogin = asyncHandler(async (req: Request, res: Response) => {
-    const { code } = req.query;
+    const { code, state } = req.query;
+
+    if (!code || !state) {
+      return errorResponse(res, 400, 'code와 state가 필요합니다.');
+    }
+
     const params = {
       client_id: process.env.AUTH_GITHUB_CLIENT_ID,
       client_secret: process.env.AUTH_GITHUB_SECRET,
@@ -118,128 +123,6 @@ class AuthController {
     });
 
     successResponse(res, 200, '성공적으로 로그인 되었습니다.');
-  });
-
-  /**
-   * 네이버 소셜 로그인
-   * POST /api/auth/login/naver
-   */
-  static naverLogin = asyncHandler(async (req: Request, res: Response) => {
-    const { code, state } = req.query;
-    const params = {
-      grant_type: 'authorization_code',
-      client_id: process.env.NAVER_CLIENT_ID,
-      client_secret: process.env.NAVER_CLIENT_SECRET,
-      code,
-      state,
-    };
-
-    // access_token 요청
-    const tokenResponse = await axios.post(
-      'https://nid.naver.com/oauth2.0/token',
-      null,
-
-      {
-        params: params,
-      }
-    );
-
-    // 정보 요청
-    const userResponse = await axios.get(
-      'https://openapi.naver.com/v1/nid/me',
-      {
-        headers: {
-          Authorization: `Bearer ${tokenResponse.data.access_token}`,
-        },
-      }
-    );
-
-    console.log(userResponse);
-
-    const socialLoginData = userResponse.data as {
-      response: {
-        id: number;
-        name: string;
-        profile_image: string;
-      };
-    };
-
-    const {
-      id: provider_id,
-      name,
-      profile_image: avatar_url,
-    } = socialLoginData.response;
-
-    // 테이블에 있는지 체크
-    const { data: exist } = await supabase
-      .from('social_users')
-      .select('user_id, id')
-      .eq('provider_id', provider_id)
-      .eq('provider_name', 'naver')
-      .maybeSingle();
-
-    let userId;
-    // 이미 있는 회원이면 upsert, 없는 회원이면 insert
-    if (exist) {
-      const { data } = await supabase
-        .from('users')
-        .upsert({
-          id: exist.user_id,
-          username: name,
-          avatar_url: avatar_url,
-        })
-        .select('id')
-        .single();
-
-      userId = data!.id;
-    } else {
-      const { data } = await supabase
-        .from('users')
-        .insert({
-          username: name,
-          avatar_url: avatar_url,
-        })
-        .select('id')
-        .single();
-
-      userId = data!.id;
-    }
-
-    const { data, error } = await supabase.from('social_users').upsert(
-      [
-        {
-          provider_name: 'naver',
-          provider_id: provider_id, // string이라 에러 나는중
-          user_id: userId,
-        },
-      ],
-      { onConflict: 'provider_id' }
-    );
-
-    console.log('데이터', provider_id);
-
-    const token = jwt.sign(
-      {
-        id: data.id,
-        name: data.name,
-      },
-      JWT_SECRET,
-      {
-        issuer: 'walkey',
-        expiresIn: ONE_WEEK,
-      }
-    );
-
-    res.cookie('walkey_access_token', token, {
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 30 * 60 * 1000,
-    });
-
-    // jwt 발급
-
-    // console.log(userResponse);
-    successResponse(res, 200, `엑세스 코드: ${code}`);
   });
 
   /**
