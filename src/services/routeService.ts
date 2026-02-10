@@ -21,8 +21,8 @@ export class RouteService {
 
     await this.createDetailPaths(sorted);
 
-    // 최대 4개 반환
-    return parsedSorted.slice(0, 4);
+    // 최대 5개 반환
+    return parsedSorted.slice(0, 5);
   }
 
   /**
