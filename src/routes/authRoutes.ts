@@ -1,6 +1,6 @@
 import express from 'express';
 import AuthController from '../controllers/authController';
-import AuthNaverController from '../controllers/naverAuthController';
+import AuthNaverController from '../controllers/authNaverController';
 
 const router = express.Router();
 
