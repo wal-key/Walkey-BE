@@ -36,8 +36,6 @@ class AuthNaverController {
       state,
     };
 
-    console.log(code);
-
     // access_token 요청
     const tokenResponse = await axios.post(
       'https://nid.naver.com/oauth2.0/token',
