@@ -2,14 +2,17 @@ import axios from 'axios';
 
 export class githubOAuth {
   static async getToken(code: string) {
-    const params = {
-      client_id: process.env.AUTH_GITHUB_CLIENT_ID,
-      client_secret: process.env.AUTH_GITHUB_SECRET,
-      code: code,
-    };
-    const tokenUrl = 'https://github.com/login/oauth/access_token';
+    const tokenUrl =
+      `https://github.com/login/oauth/access_token` +
+      `?client_id=${process.env.AUTH_GITHUB_CLIENT_ID}` +
+      `&client_secret=${process.env.AUTH_GITHUB_SECRET}` +
+      `&code=${code}`;
     return await axios
-      .post(tokenUrl, JSON.stringify(params))
+      .post(tokenUrl, null, {
+        headers: {
+          accept: 'application/json',
+        },
+      })
       .then<string | null>((res) => res.data.access_token);
   }
 

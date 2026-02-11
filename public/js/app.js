@@ -63,7 +63,7 @@ async function getTables() {
 /**
  * github 로그인
  */
-async function githubLogin() {
+async function githubSignin() {
   const data = await fetch('/api/auth/signin/github').then((res) => res.json());
   window.location.href = data.url;
 }
@@ -71,7 +71,7 @@ async function githubLogin() {
 /**
  * google 로그인
  */
-async function googleLogin() {
+async function googleSignin() {
   const data = await fetch('/api/auth/signin/google').then((res) => res.json());
   window.location.href = data.url;
 }
@@ -79,7 +79,7 @@ async function googleLogin() {
 /**
  * naver 로그인
  */
-async function naverLogin() {
+async function naverSignin() {
   const data = await fetch('/api/auth/login/naver').then((res) => res.json());
   window.location.href = data.url;
 }

@@ -1,16 +1,11 @@
-import jwt from 'jsonwebtoken';
-import { supabase } from '../config/supabase';
 import { asyncHandler } from '../utils/asyncHandler';
 import { errorResponse, successResponse } from '../utils/response';
 import { NextFunction, Request, Response } from 'express';
-import ProviderController from './providerController';
-import axios from 'axios';
 import { githubOAuth, googleOAuth, naverOAuth } from '../services/OAuthService';
 import SocialUser from '../models/socialUserModel';
 import User from '../models/userModel';
 import UserInfo from '../models/userInfoModel';
 import { issueJWT } from '../utils/jwtUtils';
-import { UUID } from 'node:crypto';
 
 const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
 
@@ -37,7 +32,6 @@ class OAuthController {
 
   static googleSignin = asyncHandler(async (req: Request, res: Response) => {
     const { code } = req.query;
-
     //OAuth token 요청
     const token = await googleOAuth.getToken(code as string);
     if (!token) {
@@ -49,14 +43,14 @@ class OAuthController {
     if (!profile) {
       return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
     }
-    this.completeOAuthLogin(res, profile);
+    return this.completeOAuthLogin(res, profile);
   });
 
   static githubSignin = asyncHandler(async (req: Request, res: Response) => {
     const { code } = req.query;
-
     //OAuth token 요청
     const token = await githubOAuth.getToken(code as string);
+    console.log(token);
     if (!token) {
       return errorResponse(res, 500, '소셜 로그인 토큰 에러가 발생했습니다.');
     }

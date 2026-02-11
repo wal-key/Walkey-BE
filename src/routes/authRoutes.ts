@@ -12,6 +12,6 @@ router.route('/callback/:provider').get(OAuthController.handlerOauthCallback);
 
 // 네이버
 router.get('/callback/naver', AuthNaverController.naverLogin);
-router.get('/login/naver', AuthNaverController.getNaverUrl);
+router.get('/signin/:provider', AuthController.getSigninUrl);
 
 export default router;
