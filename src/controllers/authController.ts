@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/userModel';
 import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse, errorResponse } from '../utils/response';
-import { supabase, supabaseAdmin } from '../config/supabase';
+import { supabase } from '../config/supabase';
 
 // JWT 비밀키 (환경변수에서 가져오거나 기본값 사용)
 const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret_key_change_me';
@@ -46,7 +46,7 @@ class AuthController {
     };
     const { name, avatar_url, id: provider_id } = socialLoginData;
 
-    const { data: exist } = await supabaseAdmin
+    const { data: exist } = await supabase
       .from('social_users')
       .select('user_id, id')
       .eq('provider_id', provider_id)
@@ -55,7 +55,7 @@ class AuthController {
 
     let userRes;
     if (exist) {
-      userRes = await supabaseAdmin
+      userRes = await supabase
         .from('users')
         .upsert({
           id: exist.user_id,
@@ -65,7 +65,7 @@ class AuthController {
         .select()
         .single();
     } else {
-      userRes = await supabaseAdmin
+      userRes = await supabase
         .from('users')
         .insert({
           username: name,
@@ -81,22 +81,20 @@ class AuthController {
       return errorResponse(res, 500, userError.message);
     }
 
-    const { error: socialError } = await supabaseAdmin
-      .from('social_users')
-      .upsert(
-        {
-          user_id: userData.id,
-          provider_id,
-          provider_name: 'github',
-        },
-        { onConflict: 'provider_id' }
-      );
+    const { error: socialError } = await supabase.from('social_users').upsert(
+      {
+        user_id: userData.id,
+        provider_id,
+        provider_name: 'github',
+      },
+      { onConflict: 'provider_id' }
+    );
 
     if (socialError) {
       return errorResponse(res, 500, socialError.message);
     }
 
-    const { error: userInfoError } = await supabaseAdmin
+    const { error: userInfoError } = await supabase
       .from('user_infos')
       .upsert({ id: userData.id });
 
