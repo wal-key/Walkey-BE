@@ -69,6 +69,15 @@ async function githubLogin() {
 }
 
 /**
+ * naver 로그인
+ */
+async function naverLogin() {
+  const data = await fetch('/api/auth/login/naver').then((res) => res.json());
+
+  window.location.href = data.url;
+}
+
+/**
  * 데이터 조회
  */
 async function getData(type) {
