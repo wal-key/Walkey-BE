@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import path from 'path';
 import config from './config';
 import routes from './routes';
+import cookieParser from 'cookie-parser';
 import { notFound, errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -69,6 +70,9 @@ if (config.server.env === 'development') {
     next();
   });
 }
+
+// 전역 쿠키 파서
+app.use(cookieParser());
 
 // API 라우트
 app.use('/api', routes);
