@@ -1,5 +1,7 @@
+import { UUID } from 'node:crypto';
 import prisma from '../lib/prisma';
 import bcrypt from 'bcrypt';
+import { supabase } from '../config/supabase';
 
 class User {
   /**
@@ -63,17 +65,21 @@ class User {
     };
   }
 
-    /**
-     * 사용자의 산책 세션 목록 조회
-     * @param {string} userId 
-     */
-    static async findSessionsByUserId(userId: string) {
-        return await prisma.session.findMany({
-            where: { user_id: userId },
-            include: { route: { select: { total_distance: true, estimated_time: true, name: true } } },
-            orderBy: { start_time: 'desc' }
-        });
-    }
+  /**
+   * 사용자의 산책 세션 목록 조회
+   * @param {string} userId
+   */
+  static async findSessionsByUserId(userId: string) {
+    return await prisma.session.findMany({
+      where: { user_id: userId },
+      include: {
+        route: {
+          select: { total_distance: true, estimated_time: true, name: true },
+        },
+      },
+      orderBy: { start_time: 'desc' },
+    });
+  }
 
   /**
    * 새 사용자 생성 (회원가입)
@@ -81,43 +87,35 @@ class User {
    */
   static async create(userData: {
     username: string;
-    avatar_url: string;
-    email: string;
-    passwordHash: string;
+    avatarUrl: string;
+    email?: string;
+    userId?: UUID;
   }) {
-    const result = await prisma.user.create({
-      data: {
-        username: userData.username,
-        avatar_url: userData.avatar_url,
-        user_info: {
-          create: {
-            email: userData.email,
-            password: userData.passwordHash,
-          },
-        },
-      },
-      include: { user_info: true },
-    });
-
-    return {
-      id: result.id,
-      username: result.username,
-      email: result.user_info?.email,
-      avatar_url: result.avatar_url,
-    };
-  }
-
-  /**
-   * 비밀번호 검증
-   * @param {string} inputPassword - 입력받은 비밀번호
-   * @param {string} storedHash - 저장된 해시
-   */
-  static async verifyPassword(inputPassword: string, storedHash: string) {
-    if (!storedHash || typeof storedHash !== 'string') {
-      console.warn('⚠️ 저장된 비밀번호 해시가 유효하지 않습니다.');
-      return false;
+    const { username, avatarUrl, email, userId } = userData;
+    let userRes;
+    if (userId) {
+      userRes = await supabase
+        .from('users')
+        .upsert({
+          id: userId,
+          username: username,
+          avatar_url: avatarUrl,
+          email: email,
+        })
+        .select()
+        .single();
+    } else {
+      userRes = await supabase
+        .from('users')
+        .insert({
+          username: username,
+          avatar_url: avatarUrl,
+          email: email,
+        })
+        .select()
+        .single();
     }
-    return await bcrypt.compare(inputPassword, storedHash);
+    return userRes;
   }
 }
 
