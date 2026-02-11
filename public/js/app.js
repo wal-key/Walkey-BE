@@ -80,7 +80,7 @@ async function googleSignin() {
  * naver 로그인
  */
 async function naverSignin() {
-  const data = await fetch('/api/auth/login/naver').then((res) => res.json());
+  const data = await fetch('/api/auth/signin/naver').then((res) => res.json());
   window.location.href = data.url;
 }
 
