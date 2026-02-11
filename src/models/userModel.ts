@@ -89,6 +89,7 @@ class User {
     username: string;
     avatarUrl: string;
     email?: string;
+    passwordHash?: string;
     userId?: UUID;
   }) {
     const { username, avatarUrl, email, userId } = userData;

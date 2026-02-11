@@ -183,7 +183,7 @@ class UserController {
     const passwordHash = await bcrypt.hash(password, 10);
 
     // 3. 사용자 생성
-    const newUser = await User.create({
+    const newUser = await User.upsert({
       username,
       avatarUrl:
         avatar_url ||

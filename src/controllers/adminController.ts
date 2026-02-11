@@ -108,11 +108,11 @@ class AdminController {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({
+    const newUser = await User.upsert({
       username,
       email,
       passwordHash,
-      avatar_url:
+      avatarUrl:
         avatar_url ||
         `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
     });
