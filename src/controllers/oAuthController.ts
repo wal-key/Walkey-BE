@@ -5,12 +5,11 @@ import { errorResponse, successResponse } from '../utils/response';
 import { NextFunction, Request, Response } from 'express';
 import ProviderController from './providerController';
 import axios from 'axios';
-
-interface GoogleUserInfo {
-  name: string;
-  sub: number;
-  picture: string;
-}
+import { googleOAuth } from '../services/OAuthService';
+import SocialUser from '../models/socialUserModel';
+import User from '../models/userModel';
+import UserInfo from '../models/userInfoModel';
+import { issueJWT } from '../utils/jwtUtils';
 
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
@@ -21,11 +20,11 @@ class OAuthController {
       const { provider } = req.params;
       switch (provider) {
         case 'google':
-          ProviderController.googleSignin(req, res, next);
+          this.googleSignin(req, res, next);
         case 'github':
-          ProviderController.githubSignin(req, res, next);
+          this.githubSignin(req, res, next);
         case 'naver':
-          ProviderController.naverSignin(req, res, next);
+          this.naverSignin(req, res, next);
         case 'kakao':
         default:
           break;
@@ -34,106 +33,73 @@ class OAuthController {
   );
 
   static googleSignin = asyncHandler(async (req: Request, res: Response) => {
+    const { provider } = req.params;
     const { code } = req.query;
-    const params = {
-      client_id: process.env.AUTH_GOOGLE_CLIENT_ID,
-      client_secret: process.env.AUTH_GOOGLE_SECRET,
-      code: code,
-      redirect_uri: 'http://localhost:3000/api/auth/callback/google',
-      grant_type: 'authorization_code',
-    };
-    const tokenUrl = 'https://oauth2.googleapis.com/token';
-    const userInfoUrl = 'https://www.googleapis.com/oauth2/v3/userinfo';
-    const googleUserInfo = await axios
-      .post(tokenUrl, JSON.stringify(params))
-      .then(async (res) => {
-        const { access_token } = res.data;
-        const userData = await axios
-          .get(userInfoUrl, {
-            headers: { Authorization: `Bearer ${access_token}` },
-          })
-          .then((res) => res.data);
-        return userData;
-      });
 
-    const { name, sub, picture } = googleUserInfo as {
-      name: string;
-      sub: number;
-      picture: string;
-    };
-
-    const { data: exist } = await supabase
-      .from('social_users')
-      .select('user_id, id')
-      .eq('provider_id', sub.toString())
-      .eq('provider_name', 'google')
-      .single();
-
-    let userRes;
-    if (exist) {
-      userRes = await supabase
-        .from('users')
-        .upsert({
-          id: exist.user_id,
-          username: name,
-          avatar_url: picture,
-        })
-        .select()
-        .single();
-    } else {
-      userRes = await supabase
-        .from('users')
-        .insert({
-          username: name,
-          avatar_url: picture,
-        })
-        .select()
-        .single();
+    //OAuth token 요청
+    const token = await googleOAuth.getToken<string>(code as string);
+    if (!token) {
+      return errorResponse(res, 500, '소셜 로그인 토큰 에러가 발생했습니다.');
     }
 
-    const { data: userData, error: userError } = userRes;
+    //OAuth 프로필 요청
+    const profile = await googleOAuth.getProfile(token);
+    if (!profile) {
+      return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
+    }
+
+    //DB 소셜 계정 존재 확인
+    const socialUser = await SocialUser.findByProviderId(profile.providerId);
+
+    //DB 소셜 계정이 없으면 사용자 생성, 있으면 업데이트
+    const { data: userData, error: userError } = await User.upsert({
+      username: profile.username,
+      avatarUrl: profile.avatarUrl,
+      userId: socialUser?.id,
+      email: socialUser?.email,
+    });
 
     if (userError) {
       return errorResponse(res, 500, userError.message);
     }
 
-    const { error: socialError } = await supabase.from('social_users').upsert(
-      {
-        user_id: userData.id,
-        provider_id: sub.toString(),
-        provider_name: 'google',
-      },
-      { onConflict: 'provider_id' }
-    );
+    //DB에 소셜 계성 생성 또는 업데이트
+    const { data: socialUserData, error: socialUserError } =
+      await SocialUser.upsert({
+        userId: userData.id,
+        providerId: profile.providerId,
+        providerName: provider as string,
+      });
 
-    if (socialError) {
-      return errorResponse(res, 500, socialError.message);
+    if (socialUserError) {
+      return errorResponse(res, 500, socialUserError.message);
     }
 
-    const { error: userInfoError } = await supabase
-      .from('user_infos')
-      .upsert({ id: userData.id });
+    //DB user_infos에 생성 또는 업데이트
+    const { error: userInfoError } = await UserInfo.upsert({
+      userId: socialUserData.userId,
+    });
 
     if (userInfoError) {
       return errorResponse(res, 500, userInfoError.message);
     }
 
-    const accessToken = jwt.sign(
+    //JWT 토큰 발행
+    const accessToken = issueJWT(
       {
         username: userData.username,
         id: userData.id,
       },
-      JWT_SECRET,
-      {
-        issuer: 'walkey',
-        expiresIn: ONE_WEEK,
-      }
+      'walkey',
+      ONE_WEEK
     );
+
+    //JWT 쿠키에 삽입
     res.cookie('walkey_access_token', accessToken, {
       httpOnly: true,
     });
 
-    successResponse(res, 200, '성공적으로 로그인 되었습니다.');
+    return successResponse(res, 200, '성공적으로 로그인 되었습니다.');
   });
 
   static githubSignin = asyncHandler(async (req: Request, res: Response) => {

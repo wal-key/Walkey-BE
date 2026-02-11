@@ -1,14 +1,19 @@
 import { UUID } from 'node:crypto';
-import prisma from '../lib/prisma';
-import bcrypt from 'bcrypt';
 import { supabase } from '../config/supabase';
+
+interface User {
+  id: UUID;
+  username: string;
+  avatarUrl?: string;
+  email?: string;
+}
 
 class SocialUser {
   /**
    * Provider id로 사용자 조회
    * @param {string} email
    */
-  static async findByProviderId(providerId: string) {
+  static async findByProviderId(providerId: string): Promise<User | null> {
     const { data: socialUserInfo, error } = await supabase
       .from('social_users')
       .select('user_id')
@@ -31,7 +36,7 @@ class SocialUser {
    * 새 소셜 사용자 생성 (회원가입)
    * @param userData
    */
-  static async create(userData: {
+  static async upsert(userData: {
     userId: UUID;
     providerId: string;
     providerName: string;

@@ -11,7 +11,6 @@ const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
 class ProviderController {
   static googleSignin = asyncHandler(async (req: Request, res: Response) => {
     const { code } = req.query;
-
     const params = {
       client_id: process.env.AUTH_GOOGLE_CLIENT_ID,
       client_secret: process.env.AUTH_GOOGLE_SECRET,
@@ -19,38 +18,21 @@ class ProviderController {
       redirect_uri: 'http://localhost:3000/api/auth/callback/google',
       grant_type: 'authorization_code',
     };
+    const tokenUrl = 'https://oauth2.googleapis.com/token';
+    const userInfoUrl = 'https://www.googleapis.com/oauth2/v3/userinfo';
+    const googleUserInfo = await axios
+      .post(tokenUrl, JSON.stringify(params))
+      .then(async (res) => {
+        const { access_token } = res.data;
+        const userData = await axios
+          .get(userInfoUrl, {
+            headers: { Authorization: `Bearer ${access_token}` },
+          })
+          .then((res) => res.data);
+        return userData;
+      });
 
-    const uri = 'https://oauth2.googleapis.com/token';
-    const authRes = await fetch(uri, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
-
-    const authData = await authRes.json();
-
-    if (!authData) {
-      errorResponse(res, 500, 'authentication error');
-    }
-
-    const { access_token } = authData as { access_token: string };
-
-    const googleUserRes = await fetch(
-      'https://www.googleapis.com/oauth2/v3/userinfo',
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      }
-    );
-
-    const googleUserData = await googleUserRes.json();
-
-    const { name, sub, picture } = googleUserData as {
+    const { name, sub, picture } = googleUserInfo as {
       name: string;
       sub: number;
       picture: string;

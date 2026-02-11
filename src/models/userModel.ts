@@ -85,7 +85,7 @@ class User {
    * 새 사용자 생성 (회원가입)
    * @param userData
    */
-  static async create(userData: {
+  static async upsert(userData: {
     username: string;
     avatarUrl: string;
     email?: string;
@@ -115,6 +115,7 @@ class User {
         .select()
         .single();
     }
+
     return userRes;
   }
 
