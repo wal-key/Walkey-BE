@@ -50,13 +50,13 @@ class OAuthController {
     const { code } = req.query;
     //OAuth token 요청
     const token = await githubOAuth.getToken(code as string);
-    console.log(token);
+
     if (!token) {
       return errorResponse(res, 500, '소셜 로그인 토큰 에러가 발생했습니다.');
     }
 
     //OAuth 프로필 요청
-    const profile = await googleOAuth.getProfile(token);
+    const profile = await githubOAuth.getProfile(token);
     if (!profile) {
       return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
     }
@@ -79,7 +79,7 @@ class OAuthController {
       return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
     }
 
-    this.completeOAuthLogin(res, profile);
+    await this.completeOAuthLogin(res, profile);
   });
   static kakaoSignin = asyncHandler(async (req: Request, res: Response) => {});
 
@@ -118,10 +118,9 @@ class OAuthController {
     if (socialUserError) {
       return errorResponse(res, 500, socialUserError.message);
     }
-
     //DB user_infos에 생성 또는 업데이트
     const { error: userInfoError } = await UserInfo.upsert({
-      userId: socialUserData.userId,
+      userId: socialUserData.user_id,
     });
 
     if (userInfoError) {
@@ -143,7 +142,7 @@ class OAuthController {
       httpOnly: true,
     });
 
-    return successResponse(res, 200, '성공적으로 로그인 되었습니다.');
+    successResponse(res, 200, '성공적으로 로그인 되었습니다.');
   };
 }
 
