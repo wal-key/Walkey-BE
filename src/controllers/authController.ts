@@ -27,7 +27,11 @@ class AuthController {
     const redirectUri = 'http://localhost:3000/api/auth/callback/github';
     const scope = 'email user:name user:login';
 
-    const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+    const url =
+      `https://github.com/login/oauth/authorize` +
+      `?client_id=${clientId}` +
+      `&redirect_uri=${redirectUri}` +
+      `&scope=${scope}`;
     res.json({ url });
   });
 
@@ -36,7 +40,12 @@ class AuthController {
     const scope = 'profile';
     const redirectUri = 'http://localhost:3000/api/auth/callback/google';
     const responseType = 'code';
-    const url = `https://accounts.google.com/o/oauth2/v2/auth?response_type=${responseType}&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+    const url =
+      `https://accounts.google.com/o/oauth2/v2/auth` +
+      `?response_type=${responseType}` +
+      `&client_id=${clientId}` +
+      `&redirect_uri=${redirectUri}` +
+      `&scope=${scope}`;
     res.json({ url });
   });
 
@@ -46,7 +55,12 @@ class AuthController {
     const state = Math.random().toString(36).substring(2, 15);
     const responseType = 'code';
 
-    const url = `https://nid.naver.com/oauth2.0/authorize?response_type=${responseType}&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+    const url =
+      `https://nid.naver.com/oauth2.0/authorize` +
+      `?response_type=${responseType}` +
+      `&client_id=${clientId}` +
+      `&redirect_uri=${redirectUri}` +
+      `&state=${state}`;
     res.json({ url });
   });
 
