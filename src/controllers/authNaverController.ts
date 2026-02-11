@@ -116,7 +116,7 @@ class AuthNaverController {
       [
         {
           provider_name: 'naver',
-          provider_id: provider_id, // string이라 에러 나는중
+          provider_id: provider_id,
           user_id: userId,
         },
       ],
