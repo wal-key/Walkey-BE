@@ -117,6 +117,19 @@ class User {
     }
     return userRes;
   }
+
+  /**
+   * 비밀번호 검증
+   * @param {string} inputPassword - 입력받은 비밀번호
+   * @param {string} storedHash - 저장된 해시
+   */
+  static async verifyPassword(inputPassword: string, storedHash: string) {
+    if (!storedHash || typeof storedHash !== 'string') {
+      console.warn('⚠️ 저장된 비밀번호 해시가 유효하지 않습니다.');
+      return false;
+    }
+    return await bcrypt.compare(inputPassword, storedHash);
+  }
 }
 
 export default User;

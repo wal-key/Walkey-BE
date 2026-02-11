@@ -185,11 +185,10 @@ class UserController {
     // 3. 사용자 생성
     const newUser = await User.create({
       username,
-      avatar_url:
+      avatarUrl:
         avatar_url ||
         `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
       email,
-      passwordHash,
     });
 
     return successResponse(res, 201, newUser, '회원가입 성공');
