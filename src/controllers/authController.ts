@@ -5,6 +5,68 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse, errorResponse } from '../utils/response';
 const JWT_SECRET = process.env.JWT_SECRET || '';
 class AuthController {
+  static getSigninUrl = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+      const { provider } = req.params;
+      switch (provider) {
+        case 'google':
+          this.getGoogleUrl(req, res, next);
+          break;
+        case 'github':
+          this.getGithubUrl(req, res, next);
+          break;
+        case 'naver':
+          this.getNaverUrl(req, res, next);
+          break;
+        case 'kakao':
+        default:
+          break;
+      }
+    }
+  );
+
+  static getGithubUrl = asyncHandler(async (req: Request, res: Response) => {
+    const clientId = process.env.AUTH_GITHUB_CLIENT_ID;
+    const redirectUri = 'http://localhost:3000/api/auth/callback/github';
+    const scope = 'email user:name user:login';
+
+    const url = `https://github.com/login/oauth/authorize
+      ?client_id=${clientId}
+      &redirect_uri=${redirectUri}
+      &scope=${scope}
+    `;
+    res.json({ url });
+  });
+
+  static getGoogleUrl = asyncHandler(async (req: Request, res: Response) => {
+    const clientId = process.env.AUTH_GOOGLE_CLIENT_ID;
+    const scope = 'profile';
+    const redirectUri = 'http://localhost:3000/api/auth/callback/google';
+    const responseType = 'code';
+    const url = `https://accounts.google.com/o/oauth2/v2/auth
+      ?response_type=${responseType}
+      &client_id=${clientId}
+      &redirect_uri=${redirectUri}
+      &scope=${scope}
+    `;
+    res.json({ url });
+  });
+
+  static getNaverUrl = asyncHandler(async (req: Request, res: Response) => {
+    const clientId = process.env.NAVER_CLIENT_ID;
+    const redirectUri = 'http://localhost:3000/api/auth/callback/naver';
+    const state = Math.random().toString(36).substring(2, 15);
+    const responseType = 'code';
+
+    const url = `https://nid.naver.com/oauth2.0/authorize
+      ?response_type=${responseType}
+      &client_id=${clientId}
+      &redirect_uri=${redirectUri}
+      &state=${state}
+    `;
+    res.json({ url });
+  });
+
   /**
    * 로그인
    * POST /api/auth/login

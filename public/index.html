@@ -61,22 +61,13 @@
         <!-- 소셜 로그인 테스트 섹션 -->
         <section class="test-section">
           <h2>소셜 로그인 테스트</h2>
-          <button
-            onClick="location.href='https://github.com/login/oauth/authorize?client_id=Ov23li1UwRcARwdj1Tg3&scope=user:email user:name user:login'"
-            class="btn btn-primary"
-          >
+          <button onClick="githubLogin()" class="btn btn-primary">
             Github 로그인
           </button>
-          <button
-            onClick="location.href='https://accounts.google.com/o/oauth2/v2/auth?response_type=code&scope=profile&client_id=341604219706-jntqmhhvd9snjl41qhn4lnf72urqjpbm.apps.googleusercontent.com&redirect_uri=http://localhost:3000/api/auth/callback/google'"
-            class="btn btn-primary"
-          >
+          <button onClick="googleLogin()" class="btn btn-primary">
             Google 로그인
           </button>
-          <button
-                  onClick="naverLogin()"
-                  class="btn btn-primary"
-          >
+          <button onClick="naverLogin()" class="btn btn-primary">
             Naver 로그인
           </button>
           <div id="connection-result" class="result-box"></div>
