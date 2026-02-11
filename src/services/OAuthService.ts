@@ -20,7 +20,10 @@ export class githubOAuth {
     const profileUrl = 'https://api.github.com/user';
     const profileData = await axios
       .get(profileUrl, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       })
       .then((res) => res.data);
 
