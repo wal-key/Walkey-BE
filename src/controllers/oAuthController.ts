@@ -43,7 +43,7 @@ class OAuthController {
     if (!profile) {
       return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
     }
-    return this.completeOAuthLogin(res, profile);
+    return this.completeOAuthSignin(res, profile);
   });
 
   static githubSignin = asyncHandler(async (req: Request, res: Response) => {
@@ -61,7 +61,7 @@ class OAuthController {
       return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
     }
 
-    this.completeOAuthLogin(res, profile);
+    this.completeOAuthSignin(res, profile);
   });
 
   static naverSignin = asyncHandler(async (req: Request, res: Response) => {
@@ -79,11 +79,11 @@ class OAuthController {
       return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
     }
 
-    await this.completeOAuthLogin(res, profile);
+    await this.completeOAuthSignin(res, profile);
   });
   static kakaoSignin = asyncHandler(async (req: Request, res: Response) => {});
 
-  static completeOAuthLogin = async (
+  static completeOAuthSignin = async (
     res: Response,
     profile: {
       providerId: string;
