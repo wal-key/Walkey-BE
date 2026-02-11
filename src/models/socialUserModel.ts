@@ -1,19 +1,12 @@
 import { UUID } from 'node:crypto';
 import { supabase } from '../config/supabase';
 
-interface User {
-  id: UUID;
-  username: string;
-  avatarUrl?: string;
-  email?: string;
-}
-
 class SocialUser {
   /**
    * Provider id로 사용자 조회
    * @param {string} email
    */
-  static async findByProviderId(providerId: string): Promise<User | null> {
+  static async findByProviderId(providerId: string) {
     const { data: socialUserInfo, error } = await supabase
       .from('social_users')
       .select('user_id')
@@ -24,12 +17,7 @@ class SocialUser {
       return null;
     }
 
-    const { data: userData } = await supabase
-      .from('users')
-      .select()
-      .eq('id', socialUserInfo.user_id)
-      .single();
-    return { ...userData, email: '' };
+    return socialUserInfo;
   }
 
   /**

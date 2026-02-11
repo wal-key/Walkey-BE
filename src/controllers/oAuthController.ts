@@ -99,8 +99,7 @@ class OAuthController {
     const { data: userData, error: userError } = await User.upsert({
       username: profile.username,
       avatarUrl: profile.avatarUrl,
-      userId: socialUser?.id,
-      email: socialUser?.email,
+      userId: socialUser?.user_id,
     });
 
     if (userError) {
