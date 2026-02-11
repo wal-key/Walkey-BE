@@ -89,7 +89,12 @@ export class googleOAuth {
     };
     const tokenUrl = 'https://oauth2.googleapis.com/token';
     return await axios
-      .post(tokenUrl, JSON.stringify(params))
+      .post(tokenUrl, JSON.stringify(params), {
+        headers: {
+          accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      })
       .then<string | null>((res) => res.data.access_token);
   }
 
