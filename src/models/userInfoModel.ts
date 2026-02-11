@@ -1,6 +1,4 @@
 import { UUID } from 'node:crypto';
-import prisma from '../lib/prisma';
-import bcrypt from 'bcrypt';
 import { supabase } from '../config/supabase';
 
 class UserInfo {
