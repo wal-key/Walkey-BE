@@ -17,7 +17,7 @@ class SocialUser {
     const { data: socialUserInfo, error } = await supabase
       .from('social_users')
       .select('user_id')
-      .is('provider_id', providerId)
+      .eq('provider_id', providerId)
       .single();
 
     if (error) {
