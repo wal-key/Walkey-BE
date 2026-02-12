@@ -65,6 +65,18 @@ class AuthController {
     res.json({ url });
   });
 
+  static getKakaoUrl = asyncHandler(async (req: Request, res: Response) => {
+    const clientId = process.env.AUTH_KAKAO_CLIENT_ID;
+    const redirectUri = 'http://localhost:3000/api/auth/callback/kakao';
+    const responseType = 'code';
+    const url =
+      `https://kauth.kakao.com/oauth/authorize` +
+      `?client_id=${clientId}` +
+      `redirect_uri=${redirectUri}` +
+      `response_type=${responseType}`;
+    res.json({ url });
+  });
+
   /**
    * 로그인
    * POST /api/auth/login
