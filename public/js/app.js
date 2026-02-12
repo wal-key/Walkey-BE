@@ -83,6 +83,13 @@ async function naverSignin() {
   const data = await fetch('/api/auth/signin/naver').then((res) => res.json());
   window.location.href = data.url;
 }
+/**
+ * naver 로그인
+ */
+async function kakaoSignin() {
+  const data = await fetch('/api/auth/signin/kakao').then((res) => res.json());
+  window.location.href = data.url;
+}
 
 /**
  * 데이터 조회
