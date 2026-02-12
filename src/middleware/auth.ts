@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { successResponse } from '../utils/response';
+import { errorResponse } from '../utils/response';
 
 declare global {
   namespace Express {
     interface Request {
       user?: {
         id: string | number;
+        name: string;
       };
     }
   }
@@ -18,6 +19,11 @@ interface JwtPayload {
   exp: number;
 }
 
+/**
+ * 1모든 요청에서 실행
+ * - 토큰이 있으면 해석해서 req.user에 저장
+ * - 절대 막지 않음
+ */
 export const authCookieParser = (
   req: Request,
   res: Response,
@@ -26,14 +32,40 @@ export const authCookieParser = (
   const token = req.cookies?.walkey_access_token;
 
   if (!token) {
+    req.user = undefined;
     return next();
   }
 
   try {
-    jwt.verify(token, process.env.JWT_SECRET as string);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      id: string;
+      name: string;
+    };
 
-    return successResponse(res, 200, '이미 로그인되어 있습니다.');
+    req.user = {
+      id: decoded.id,
+      name: decoded.name,
+    };
   } catch (err) {
-    return next();
+    req.user = undefined;
   }
+
+  next();
+};
+
+/**
+ * 2️⃣ 보호가 필요한 API에서만 사용
+ * - 로그인 안되어 있으면 401
+ */
+
+export const requireAuth = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.user) {
+    return errorResponse(res, 401, '로그인이 필요합니다.');
+  }
+
+  next();
 };

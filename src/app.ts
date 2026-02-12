@@ -7,6 +7,8 @@ import config from './config';
 import routes from './routes';
 import cookieParser from 'cookie-parser';
 import { notFound, errorHandler } from './middleware/errorHandler';
+import { authCookieParser, requireAuth } from './middleware/auth';
+import authRouter from './routes/authRoutes';
 
 const app = express();
 
@@ -73,9 +75,11 @@ if (config.server.env === 'development') {
 
 // 전역 쿠키 파서
 app.use(cookieParser());
+app.use(authCookieParser);
 
 // API 라우트
-app.use('/api', routes);
+app.use('/api/auth', authRouter);
+app.use('/api', requireAuth, routes);
 
 // Kakao Map API Key 제공 API
 app.get('/api/config/kakao', (req: Request, res: Response) => {
