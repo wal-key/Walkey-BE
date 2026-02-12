@@ -1,6 +1,5 @@
 import express, { Request, Response } from 'express';
 import dbController from '../controllers/databaseController';
-import authRoutes from './authRoutes';
 import userRoutes from './userRoutes';
 import themeRoutes from './themeRoutes';
 import routeRoutes from './routeRoutes';
@@ -21,7 +20,6 @@ router.get('/health', (req: Request, res: Response) => {
 router.get('/db/test', dbController.testConnection);
 
 // 주요 API 라우트
-router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/themes', themeRoutes);
 router.use('/routes', routeRoutes);
