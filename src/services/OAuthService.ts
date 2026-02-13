@@ -74,9 +74,49 @@ export class naverOAuth {
   }
 }
 export class kakaoOAuth {
-  static async getToken(code: string) {}
+  static getToken(code: string) {
+    const params = new URLSearchParams();
+    params.append('grant_type', 'authorization_code');
+    params.append('client_id', process.env.AUTH_KAKAO_CLIENT_ID || '');
+    params.append('client_secret', process.env.AUTH_KAKAO_SECRET || '');
+    params.append(
+      'redirect_uri',
+      'http://localhost:3000/api/auth/callback/kakao'
+    );
+    params.append('code', code as string);
 
-  static async getProfile(token: string) {}
+    const tokenUrl = 'https://kauth.kakao.com/oauth/token';
+    return axios
+      .post(tokenUrl, params, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+        },
+      })
+      .then((res) => res.data.access_token);
+  }
+
+  static async getProfile(token: string) {
+    const profileUrl = 'https://kapi.kakao.com/v2/user/me';
+    const profileData = await axios
+      .get(profileUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+        },
+      })
+      .then((res) => res.data);
+
+    if (profileData.error) {
+      return null;
+    }
+    const userData = {
+      username: profileData.kakao_account.profile.nickname,
+      providerId: profileData.id,
+      providerName: 'kakao',
+      avatarUrl: profileData.kakao_account.profile.profile_image_url,
+    };
+    return userData;
+  }
 }
 export class googleOAuth {
   static async getToken(code: string) {

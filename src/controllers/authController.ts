@@ -74,7 +74,6 @@ class AuthController {
       `?client_id=${clientId}` +
       `&redirect_uri=${redirectUri}` +
       `&response_type=${responseType}`;
-    console.log(url);
     res.json({ url });
   });
 

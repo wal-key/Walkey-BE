@@ -1,7 +1,12 @@
 import { asyncHandler } from '../utils/asyncHandler';
 import { errorResponse, successResponse } from '../utils/response';
 import { NextFunction, Request, Response } from 'express';
-import { githubOAuth, googleOAuth, naverOAuth } from '../services/OAuthService';
+import {
+  githubOAuth,
+  googleOAuth,
+  kakaoOAuth,
+  naverOAuth,
+} from '../services/OAuthService';
 import SocialUser from '../models/socialUserModel';
 import User from '../models/userModel';
 import UserInfo from '../models/userInfoModel';
@@ -25,6 +30,7 @@ class OAuthController {
           break;
         case 'kakao':
         default:
+          this.kakaoSignin(req, res, next);
           break;
       }
     }
@@ -81,7 +87,20 @@ class OAuthController {
 
     await this.completeOAuthSignin(res, profile);
   });
-  static kakaoSignin = asyncHandler(async (req: Request, res: Response) => {});
+
+  static kakaoSignin = asyncHandler(async (req: Request, res: Response) => {
+    const { code } = req.query;
+    const token = await kakaoOAuth.getToken(code as string);
+    if (!token) {
+      return errorResponse(res, 500, '소셜 로그인 토큰 에러가 발생했습니다.');
+    }
+    const profile = await kakaoOAuth.getProfile(token);
+    if (!profile) {
+      return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
+    }
+
+    await this.completeOAuthSignin(res, profile);
+  });
 
   static completeOAuthSignin = async (
     res: Response,
