@@ -18,7 +18,7 @@ class AuthController {
           return this.getNaverUrl(req, res, next);
         case 'kakao':
         default:
-          break;
+          return this.getKakaoUrl(req, res, next);
       }
     }
   );
@@ -72,8 +72,9 @@ class AuthController {
     const url =
       `https://kauth.kakao.com/oauth/authorize` +
       `?client_id=${clientId}` +
-      `redirect_uri=${redirectUri}` +
-      `response_type=${responseType}`;
+      `&redirect_uri=${redirectUri}` +
+      `&response_type=${responseType}`;
+    console.log(url);
     res.json({ url });
   });
 
