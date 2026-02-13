@@ -1,196 +1,69 @@
 import { Request, Response } from 'express';
-import prisma from '../lib/prisma';
 import { asyncHandler } from '../utils/asyncHandler';
-import { successResponse, errorResponse } from '../utils/response';
-import User from '../models/userModel';
-import bcrypt from 'bcrypt';
-import { validate as uuidValidate } from 'uuid';
+import { successResponse } from '../utils/response';
+import { UserService } from '../services/userService';
 
+/**
+ * 사용자 컨트롤러 (Thin Controller Pattern)
+ *
+ * [패턴: Thin Controller]
+ * 모든 비즈니스 로직은 UserService에 위임합니다.
+ * 컨트롤러는 요청 파싱과 응답 포맷팅만 담당합니다.
+ *
+ * [효과]
+ * 1. 비즈니스 로직 변경이 UserService에서만 이루어짐
+ * 2. AppError를 throw하면 asyncHandler + 전역 에러 핸들러가 자동 처리
+ * 3. 컨트롤러 코드가 극도로 간결 (199줄 → ~60줄)
+ */
 class UserController {
-  /**
-   * 사용자 세션 생성
-   */
+  /** 산책 세션 생성 */
   static createUserSession = asyncHandler(
     async (req: Request, res: Response) => {
       const { user_id, route_id } = req.body;
-      if (!user_id || !route_id || !uuidValidate(user_id)) {
-        errorResponse(res, 400, '필수 요청 값이 누락되었습니다.');
-        return;
-      }
-
-      const validUser = await prisma.user.findUnique({
-        where: {
-          id: user_id,
-        },
-      });
-
-      if (!validUser) {
-        return errorResponse(res, 404, '존재하지 않는 사용자 입니다.');
-      }
-
-      const hasSession = await prisma.session.findFirst({
-        where: {
-          user_id: user_id,
-          end_time: {
-            equals: null,
-          },
-        },
-      });
-
-      if (hasSession) {
-        return errorResponse(res, 409, '사용자 세션이 이미 존재합니다.');
-      } else {
-        const session = await prisma.session.create({
-          data: {
-            user_id,
-            route_id,
-          },
-        });
-        if (session) {
-          successResponse(res, 201, session, '정상적으로 생성되었습니다.');
-          return;
-        }
-      }
+      const session = await UserService.createSession(user_id, route_id);
+      return successResponse(res, 201, session, '정상적으로 생성되었습니다.');
     }
   );
 
-  /**
-   * 사용자 정보 조회
-   */
+  /** 사용자 정보 조회 */
   static getUserByUsername = asyncHandler(
     async (req: Request, res: Response) => {
       const username = req.params.username as string;
-
-      // 요청 형식 검증
-      if (!username || username.trim() === '') {
-        return errorResponse(
-          res,
-          400,
-          '요청을 처리할 수 없습니다. 요청 형식이 올바르지 않습니다.'
-        );
-      }
-
-      const user = await User.findByUsername(username);
-
-      if (!user) {
-        return errorResponse(res, 404, '요청하신 사용자를 찾을 수 없습니다');
-      }
-
+      const user = await UserService.findByUsername(username);
       return successResponse(res, 200, user, '사용자 조회 성공');
     }
   );
 
-  /**
-   * 사용자의 산책 내역 조회
-   */
-  static getUserSessions = asyncHandler(async (req: Request, res: Response) => {
-    const username = req.params.username as string;
-    const user = await User.findByUsername(username);
-
-    if (!user) {
-      return errorResponse(res, 404, '사용자를 찾을 수 없습니다.');
+  /** 사용자 산책 내역 조회 */
+  static getUserSessions = asyncHandler(
+    async (req: Request, res: Response) => {
+      const username = req.params.username as string;
+      const result = await UserService.getUserSessions(username);
+      return successResponse(res, 200, result, '산책 내역 조회 성공');
     }
+  );
 
-    const sessions = await User.findSessionsByUserId(user.id);
-
-    let actualDistance = 0,
-      actualDuration = 0,
-      totalDistance = 0,
-      totalDuration = 0;
-
-    for (let s of sessions) {
-      const { actual_distance, actual_duration } = s;
-      const { total_distance, estimated_time } = s.route;
-      actualDistance += actual_distance;
-      actualDuration += actual_duration;
-      totalDistance += total_distance;
-      totalDuration += estimated_time;
-    }
-
-    // Convert BigInt IDs to string for JSON serialization
-    const formattedSessions = sessions.map((s: any) => ({
-      ...s,
-      id: s.id.toString(),
-      route_id: s.route_id?.toString(),
-    }));
-
+  /** 로그인 */
+  static signin = asyncHandler(async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    const userInfo = await UserService.signin(email, password);
     return successResponse(
       res,
       200,
-      {
-        session_info: {
-          total_distance: totalDistance,
-          total_duration: totalDuration,
-          actual_distance: actualDuration,
-          actual_duration: actualDuration,
-        },
-        ...formattedSessions,
-      },
-      '산책 내역 조회 성공'
+      null,
+      `${userInfo.email}님 성공적으로 로그인되었습니다.`
     );
   });
 
-  //로그인
-  static signin = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-    //검증 절차
-    //이메일 검증
-    if (!email || typeof email !== 'string') {
-      errorResponse(res, 400, '아이디 또는 비밀번호가 올바르지 않습니다.');
-      return;
-    }
-    const userInfo = await prisma.userInfo.findUnique({
-      where: { email },
-    });
-    if (!userInfo) {
-      errorResponse(res, 404, '회원정보가 잘못 되었습니다.');
-      return;
-    }
-    //비번 검증
-    if (!password || password !== userInfo?.password) {
-      errorResponse(res, 400, '아이디 또는 비밀번호가 올바르지 않습니다.');
-      return;
-    }
-
-    successResponse(
-      res,
-      200,
-      `${userInfo?.email}님 성공적으로 로그인되었습니다.`
-    );
-  });
-
-  /**
-   * 회원 가입
-   */
+  /** 회원 가입 */
   static signup = asyncHandler(async (req: Request, res: Response) => {
     const { username, email, password, avatar_url } = req.body;
-
-    // 1. 중복 확인
-    const [existingEmail, existingUsername] = await Promise.all([
-      prisma.userInfo.findUnique({ where: { email } }),
-      prisma.user.findFirst({ where: { username } }),
-    ]);
-
-    if (existingEmail) {
-      return errorResponse(res, 400, '이미 가입된 이메일입니다.');
-    }
-
-    if (existingUsername) {
-      return errorResponse(res, 400, '이미 사용 중인 사용자 이름입니다.');
-    }
-
-    // 2. 비밀번호 해싱
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // 3. 사용자 생성
-    const newUser = await User.upsert({
+    const newUser = await UserService.signup(
       username,
-      avatarUrl:
-        avatar_url ||
-        `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
       email,
-    });
-
+      password,
+      avatar_url
+    );
     return successResponse(res, 201, newUser, '회원가입 성공');
   });
 }
