@@ -6,23 +6,23 @@
 
 ## 기술 스택
 
-| 분류 | 기술 | 버전 | 용도 |
-|------|------|------|------|
-| **Runtime** | Node.js | - | 서버 런타임 |
-| **Language** | TypeScript | ^5.9.3 | 정적 타입 언어 |
-| **Framework** | Express.js | ^4.18.2 | HTTP 서버 프레임워크 |
-| **ORM** | Prisma Client | ^7.3.0 | DB 쿼리 (PostgreSQL 어댑터 `@prisma/adapter-pg` 사용) |
-| **Database** | PostgreSQL | - | Supabase 호스팅 PostgreSQL |
-| **BaaS** | Supabase | ^2.91.1 | 일부 모델(User upsert, SocialUser)에서 Supabase JS SDK 직접 사용 |
-| **인증** | jsonwebtoken | ^9.0.3 | JWT 기반 인증 |
-| **비밀번호** | bcrypt | ^6.0.0 | 비밀번호 해싱 |
-| **HTTP Client** | axios | ^1.13.4 | OAuth 토큰 교환 및 T-Map API 호출 |
-| **보안** | helmet | ^7.1.0 | HTTP 보안 헤더 |
-| **CORS** | cors | ^2.8.5 | Cross-Origin 설정 |
-| **Validation** | express-validator | ^7.0.1 | 요청 유효성 검사 |
-| **외부 API** | T-Map API | - | 보행자 경로 조회 (SK Open API) |
-| **외부 API** | Kakao Map API | - | 프론트엔드 지도 렌더링용 API Key 제공 |
-| **Dev Tools** | nodemon, jest, prettier, husky, commitlint | - | 개발/테스트/포맷팅/커밋 린팅 |
+| 분류            | 기술                                       | 버전    | 용도                                                             |
+| --------------- | ------------------------------------------ | ------- | ---------------------------------------------------------------- |
+| **Runtime**     | Node.js                                    | -       | 서버 런타임                                                      |
+| **Language**    | TypeScript                                 | ^5.9.3  | 정적 타입 언어                                                   |
+| **Framework**   | Express.js                                 | ^4.18.2 | HTTP 서버 프레임워크                                             |
+| **ORM**         | Prisma Client                              | ^7.3.0  | DB 쿼리 (PostgreSQL 어댑터 `@prisma/adapter-pg` 사용)            |
+| **Database**    | PostgreSQL                                 | -       | Supabase 호스팅 PostgreSQL                                       |
+| **BaaS**        | Supabase                                   | ^2.91.1 | 일부 모델(User upsert, SocialUser)에서 Supabase JS SDK 직접 사용 |
+| **인증**        | jsonwebtoken                               | ^9.0.3  | JWT 기반 인증                                                    |
+| **비밀번호**    | bcrypt                                     | ^6.0.0  | 비밀번호 해싱                                                    |
+| **HTTP Client** | axios                                      | ^1.13.4 | OAuth 토큰 교환 및 T-Map API 호출                                |
+| **보안**        | helmet                                     | ^7.1.0  | HTTP 보안 헤더                                                   |
+| **CORS**        | cors                                       | ^2.8.5  | Cross-Origin 설정                                                |
+| **Validation**  | express-validator                          | ^7.0.1  | 요청 유효성 검사                                                 |
+| **외부 API**    | T-Map API                                  | -       | 보행자 경로 조회 (SK Open API)                                   |
+| **외부 API**    | Kakao Map API                              | -       | 프론트엔드 지도 렌더링용 API Key 제공                            |
+| **Dev Tools**   | nodemon, jest, prettier, husky, commitlint | -       | 개발/테스트/포맷팅/커밋 린팅                                     |
 
 ---
 
@@ -136,10 +136,10 @@ Client Request
 
 이 프로젝트는 **두 가지 DB 접근 방식**을 병행하고 있다:
 
-| 방식 | 사용 위치 | 설명 |
-|------|----------|------|
-| **Prisma Client** (`src/lib/prisma.ts`) | `userController`, `adminController`, `themeController`, `databaseController`, `routeModel`, `userModel`(일부) | `PrismaPg` 어댑터로 pg Pool 위에 Prisma 클라이언트 생성. 주 ORM으로 사용 |
-| **Supabase JS SDK** (`src/config/supabase.ts`) | `userModel.upsert()`, `socialUserModel`, `userInfoModel` | OAuth 관련 사용자 생성/갱신에서 Supabase의 `.from().upsert()` 직접 사용 |
+| 방식                                           | 사용 위치                                                                                                     | 설명                                                                     |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| **Prisma Client** (`src/lib/prisma.ts`)        | `userController`, `adminController`, `themeController`, `databaseController`, `routeModel`, `userModel`(일부) | `PrismaPg` 어댑터로 pg Pool 위에 Prisma 클라이언트 생성. 주 ORM으로 사용 |
+| **Supabase JS SDK** (`src/config/supabase.ts`) | `userModel.upsert()`, `socialUserModel`, `userInfoModel`                                                      | OAuth 관련 사용자 생성/갱신에서 Supabase의 `.from().upsert()` 직접 사용  |
 
 > **참고**: `src/config/database.ts`의 raw `pg.Pool`은 `server.ts`에서 시작 시 연결 테스트 용도로만 사용된다.
 
@@ -188,6 +188,7 @@ Client Request
 ```
 
 **관계 요약:**
+
 - `User` 1:1 `UserInfo` (cascade delete)
 - `User` 1:N `Session`
 - `Theme` 1:N `Route`
@@ -201,55 +202,55 @@ Client Request
 
 ### 인증 (`/api/auth`)
 
-| Method | Path | Handler | 설명 |
-|--------|------|---------|------|
-| POST | `/auth/login` | `AuthController.login` | 이메일/비밀번호 로그인 → JWT 반환 |
-| GET | `/auth/signin/:provider` | `AuthController.getSigninUrl` | OAuth 로그인 URL 생성 (google/github/naver/kakao) |
-| GET | `/auth/callback/:provider` | `OAuthController.handlerOauthCallback` | OAuth 콜백 처리 → 사용자 생성/갱신 → JWT 쿠키 발급 |
-| GET | `/auth/callback/naver` | `AuthNaverController.naverLogin` | 네이버 전용 콜백 |
+| Method | Path                       | Handler                                | 설명                                               |
+| ------ | -------------------------- | -------------------------------------- | -------------------------------------------------- |
+| POST   | `/auth/login`              | `AuthController.login`                 | 이메일/비밀번호 로그인 → JWT 반환                  |
+| GET    | `/auth/signin/:provider`   | `AuthController.getSigninUrl`          | OAuth 로그인 URL 생성 (google/github/naver/kakao)  |
+| GET    | `/auth/callback/:provider` | `OAuthController.handlerOauthCallback` | OAuth 콜백 처리 → 사용자 생성/갱신 → JWT 쿠키 발급 |
+| GET    | `/auth/callback/naver`     | `AuthNaverController.naverLogin`       | 네이버 전용 콜백                                   |
 
 ### 사용자 (`/api/users`)
 
-| Method | Path | Handler | 설명 |
-|--------|------|---------|------|
-| POST | `/users/signin` | `UserController.signin` | 이메일/비밀번호 로그인 (Prisma 직접 조회) |
-| POST | `/users/sessions` | `UserController.createUserSession` | 산책 세션 시작 (user_id + route_id) |
-| GET | `/users/sessions/:username` | `UserController.getUserSessions` | 사용자의 산책 내역 + 통계 조회 |
+| Method | Path                        | Handler                            | 설명                                      |
+| ------ | --------------------------- | ---------------------------------- | ----------------------------------------- |
+| POST   | `/users/signin`             | `UserController.signin`            | 이메일/비밀번호 로그인 (Prisma 직접 조회) |
+| POST   | `/users/sessions`           | `UserController.createUserSession` | 산책 세션 시작 (user_id + route_id)       |
+| GET    | `/users/sessions/:username` | `UserController.getUserSessions`   | 사용자의 산책 내역 + 통계 조회            |
 
 ### 테마 (`/api/themes`)
 
-| Method | Path | Handler | 설명 |
-|--------|------|---------|------|
-| GET | `/themes` | `ThemeController.getThemes` | 전체 테마 목록 조회 |
+| Method | Path      | Handler                     | 설명                |
+| ------ | --------- | --------------------------- | ------------------- |
+| GET    | `/themes` | `ThemeController.getThemes` | 전체 테마 목록 조회 |
 
 ### 산책 루트 (`/api/routes`)
 
-| Method | Path | Handler | 설명 |
-|--------|------|---------|------|
-| GET | `/routes?theme=N&time=N` | `RouteController.getRecommendedRoutes` | 테마ID + 소요시간 기반 추천 루트 (최대 5개) |
+| Method | Path                     | Handler                                | 설명                                        |
+| ------ | ------------------------ | -------------------------------------- | ------------------------------------------- |
+| GET    | `/routes?theme=N&time=N` | `RouteController.getRecommendedRoutes` | 테마ID + 소요시간 기반 추천 루트 (최대 5개) |
 
 ### 관리자 (`/api/admin`)
 
-| Method | Path | Handler | 설명 |
-|--------|------|---------|------|
-| GET | `/admin/stats` | `AdminController.getDashboardStats` | 대시보드 통계 (유저/루트/세션/테마 count) |
-| POST | `/admin/themes` | `AdminController.createTheme` | 테마 생성 |
-| DELETE | `/admin/themes/:id` | `AdminController.deleteTheme` | 테마 삭제 |
-| POST | `/admin/routes` | `AdminController.createRoute` | 산책 루트 생성 |
-| DELETE | `/admin/routes/:id` | `AdminController.deleteRoute` | 산책 루트 삭제 |
-| GET | `/admin/users` | `AdminController.getUsers` | 사용자 목록 조회 |
-| POST | `/admin/users` | `AdminController.createUser` | 사용자 생성 |
-| DELETE | `/admin/users/:id` | `AdminController.deleteUser` | 사용자 삭제 |
+| Method | Path                | Handler                             | 설명                                      |
+| ------ | ------------------- | ----------------------------------- | ----------------------------------------- |
+| GET    | `/admin/stats`      | `AdminController.getDashboardStats` | 대시보드 통계 (유저/루트/세션/테마 count) |
+| POST   | `/admin/themes`     | `AdminController.createTheme`       | 테마 생성                                 |
+| DELETE | `/admin/themes/:id` | `AdminController.deleteTheme`       | 테마 삭제                                 |
+| POST   | `/admin/routes`     | `AdminController.createRoute`       | 산책 루트 생성                            |
+| DELETE | `/admin/routes/:id` | `AdminController.deleteRoute`       | 산책 루트 삭제                            |
+| GET    | `/admin/users`      | `AdminController.getUsers`          | 사용자 목록 조회                          |
+| POST   | `/admin/users`      | `AdminController.createUser`        | 사용자 생성                               |
+| DELETE | `/admin/users/:id`  | `AdminController.deleteUser`        | 사용자 삭제                               |
 
 ### 기타
 
-| Method | Path | Handler | 설명 |
-|--------|------|---------|------|
-| GET | `/health` | 인라인 | 헬스 체크 |
-| GET | `/db/test` | `DatabaseController.testConnection` | DB 연결 테스트 |
-| GET | `/config/kakao` | 인라인 | Kakao Map API Key 반환 |
-| GET | `/legacy/sessions` | `DatabaseController.getSessions` | 레거시 세션 조회 |
-| GET | `/legacy/posts` | `DatabaseController.getPosts` | 레거시 게시글 조회 |
+| Method | Path               | Handler                             | 설명                   |
+| ------ | ------------------ | ----------------------------------- | ---------------------- |
+| GET    | `/health`          | 인라인                              | 헬스 체크              |
+| GET    | `/db/test`         | `DatabaseController.testConnection` | DB 연결 테스트         |
+| GET    | `/config/kakao`    | 인라인                              | Kakao Map API Key 반환 |
+| GET    | `/legacy/sessions` | `DatabaseController.getSessions`    | 레거시 세션 조회       |
+| GET    | `/legacy/posts`    | `DatabaseController.getPosts`       | 레거시 게시글 조회     |
 
 ---
 
@@ -349,6 +350,7 @@ POST /api/users/sessions
 ## 응답 포맷
 
 ### 성공 응답
+
 ```json
 {
   "message": "성공 메시지",
@@ -357,6 +359,7 @@ POST /api/users/sessions
 ```
 
 ### 에러 응답
+
 ```json
 {
   "message": "에러 메시지",
@@ -368,25 +371,25 @@ POST /api/users/sessions
 
 ## 환경변수
 
-| 변수명 | 설명 |
-|--------|------|
-| `PORT` | 서버 포트 (기본값: 3000) |
-| `NODE_ENV` | 환경 (development/production) |
-| `DATABASE_URL` | PostgreSQL 연결 문자열 (Supabase) |
-| `SUPABASE_URL` | Supabase 프로젝트 URL |
-| `SUPABASE_ANON_KEY` | Supabase 익명 키 |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase 서비스 롤 키 (관리자용) |
-| `JWT_SECRET` | JWT 서명 시크릿 |
-| `ALLOWED_ORIGINS` | CORS 허용 오리진 (쉼표 구분) |
-| `AUTH_GITHUB_CLIENT_ID` | GitHub OAuth Client ID |
-| `AUTH_GITHUB_SECRET` | GitHub OAuth Client Secret |
-| `AUTH_GOOGLE_CLIENT_ID` | Google OAuth Client ID |
-| `AUTH_GOOGLE_SECRET` | Google OAuth Client Secret |
-| `AUTH_KAKAO_CLIENT_ID` | Kakao OAuth Client ID |
-| `NAVER_CLIENT_ID` | Naver OAuth Client ID |
-| `NAVER_CLIENT_SECRET` | Naver OAuth Client Secret |
-| `TMAP_API_KEY` | T-Map API Key (SK Open API) |
-| `KAKAO_API_KEY` | Kakao Map JavaScript API Key |
+| 변수명                      | 설명                              |
+| --------------------------- | --------------------------------- |
+| `PORT`                      | 서버 포트 (기본값: 3000)          |
+| `NODE_ENV`                  | 환경 (development/production)     |
+| `DATABASE_URL`              | PostgreSQL 연결 문자열 (Supabase) |
+| `SUPABASE_URL`              | Supabase 프로젝트 URL             |
+| `SUPABASE_ANON_KEY`         | Supabase 익명 키                  |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase 서비스 롤 키 (관리자용)  |
+| `JWT_SECRET`                | JWT 서명 시크릿                   |
+| `ALLOWED_ORIGINS`           | CORS 허용 오리진 (쉼표 구분)      |
+| `AUTH_GITHUB_CLIENT_ID`     | GitHub OAuth Client ID            |
+| `AUTH_GITHUB_SECRET`        | GitHub OAuth Client Secret        |
+| `AUTH_GOOGLE_CLIENT_ID`     | Google OAuth Client ID            |
+| `AUTH_GOOGLE_SECRET`        | Google OAuth Client Secret        |
+| `AUTH_KAKAO_CLIENT_ID`      | Kakao OAuth Client ID             |
+| `AUTH_NAVER_CLIENT_ID`      | Naver OAuth Client ID             |
+| `AUTH_NAVER_CLIENT_SECRET`  | Naver OAuth Client Secret         |
+| `TMAP_API_KEY`              | T-Map API Key (SK Open API)       |
+| `KAKAO_API_KEY`             | Kakao Map JavaScript API Key      |
 
 ---
 

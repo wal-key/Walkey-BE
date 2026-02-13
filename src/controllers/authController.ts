@@ -2,251 +2,79 @@ import 'dotenv/config';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel';
-import axios from 'axios';
 import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse, errorResponse } from '../utils/response';
-import { supabase } from '../config/supabase';
-
-// JWT 비밀키 (환경변수에서 가져오거나 기본값 사용)
-const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret_key_change_me';
-const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
-
-type AuthType = 'authentication' | 'authorization' | 'signin';
-
+const JWT_SECRET = process.env.JWT_SECRET || '';
 class AuthController {
-  static googleSignin = asyncHandler(async (req: Request, res: Response) => {
-    const { code } = req.query;
-
-    const params = {
-      client_id: process.env.AUTH_GOOGLE_CLIENT_ID,
-      client_secret: process.env.AUTH_GOOGLE_SECRET,
-      code: code,
-      redirect_uri: 'http://localhost:3000/api/auth/callback/google',
-      grant_type: 'authorization_code',
-    };
-
-    const uri = 'https://oauth2.googleapis.com/token';
-    const authRes = await fetch(uri, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
-
-    const authData = await authRes.json();
-
-    if (!authData) {
-      errorResponse(res, 500, 'authentication error');
-    }
-
-    const { access_token } = authData as { access_token: string };
-
-    const googleUserRes = await fetch(
-      'https://www.googleapis.com/oauth2/v3/userinfo',
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
+  static getSigninUrl = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+      const { provider } = req.params;
+      switch (provider) {
+        case 'google':
+          return this.getGoogleUrl(req, res, next);
+        case 'github':
+          return this.getGithubUrl(req, res, next);
+        case 'naver':
+          return this.getNaverUrl(req, res, next);
+        case 'kakao':
+        default:
+          return this.getKakaoUrl(req, res, next);
       }
-    );
-
-    const googleUserData = await googleUserRes.json();
-
-    const { name, sub, picture } = googleUserData as {
-      name: string;
-      sub: number;
-      picture: string;
-    };
-
-    const { data: exist } = await supabase
-      .from('social_users')
-      .select('user_id, id')
-      .eq('provider_id', sub.toString())
-      .eq('provider_name', 'google')
-      .single();
-
-    let userRes;
-    if (exist) {
-      userRes = await supabase
-        .from('users')
-        .upsert({
-          id: exist.user_id,
-          username: name,
-          avatar_url: picture,
-        })
-        .select()
-        .single();
-    } else {
-      userRes = await supabase
-        .from('users')
-        .insert({
-          username: name,
-          avatar_url: picture,
-        })
-        .select()
-        .single();
     }
+  );
 
-    const { data: userData, error: userError } = userRes;
+  static getGithubUrl = asyncHandler(async (req: Request, res: Response) => {
+    const clientId = process.env.AUTH_GITHUB_CLIENT_ID;
+    const redirectUri = 'http://localhost:3000/api/auth/callback/github';
+    const scope = 'email user:name user:login';
 
-    if (userError) {
-      return errorResponse(res, 500, userError.message);
-    }
-
-    const { error: socialError } = await supabase.from('social_users').upsert(
-      {
-        user_id: userData.id,
-        provider_id: sub.toString(),
-        provider_name: 'google',
-      },
-      { onConflict: 'provider_id' }
-    );
-
-    if (socialError) {
-      return errorResponse(res, 500, socialError.message);
-    }
-
-    const { error: userInfoError } = await supabase
-      .from('user_infos')
-      .upsert({ id: userData.id });
-
-    if (userInfoError) {
-      return errorResponse(res, 500, userInfoError.message);
-    }
-
-    const accessToken = jwt.sign(
-      {
-        username: userData.username,
-        id: userData.id,
-      },
-      JWT_SECRET,
-      {
-        issuer: 'walkey',
-        expiresIn: ONE_WEEK,
-      }
-    );
-    res.cookie('walkey_access_token', accessToken, {
-      httpOnly: true,
-    });
-
-    successResponse(res, 200, '성공적으로 로그인 되었습니다.');
+    const url =
+      `https://github.com/login/oauth/authorize` +
+      `?client_id=${clientId}` +
+      `&redirect_uri=${redirectUri}` +
+      `&scope=${scope}`;
+    res.json({ url });
   });
 
-  static githubLogin = asyncHandler(async (req: Request, res: Response) => {
-    const { code, state } = req.query;
+  static getGoogleUrl = asyncHandler(async (req: Request, res: Response) => {
+    const clientId = process.env.AUTH_GOOGLE_CLIENT_ID;
+    const scope = 'profile';
+    const redirectUri = 'http://localhost:3000/api/auth/callback/google';
+    const responseType = 'code';
+    const url =
+      `https://accounts.google.com/o/oauth2/v2/auth` +
+      `?response_type=${responseType}` +
+      `&client_id=${clientId}` +
+      `&redirect_uri=${redirectUri}` +
+      `&scope=${scope}`;
+    res.json({ url });
+  });
 
-    if (!code || !state) {
-      return errorResponse(res, 400, 'code와 state가 필요합니다.');
-    }
+  static getNaverUrl = asyncHandler(async (req: Request, res: Response) => {
+    const clientId = process.env.AUTH_NAVER_CLIENT_ID;
+    const redirectUri = 'http://localhost:3000/api/auth/callback/naver';
+    const state = Math.random().toString(36).substring(2, 15);
+    const responseType = 'code';
 
-    const params = {
-      client_id: process.env.AUTH_GITHUB_CLIENT_ID,
-      client_secret: process.env.AUTH_GITHUB_SECRET,
-      code: code,
-    };
+    const url =
+      `https://nid.naver.com/oauth2.0/authorize` +
+      `?response_type=${responseType}` +
+      `&client_id=${clientId}` +
+      `&redirect_uri=${redirectUri}` +
+      `&state=${state}`;
+    res.json({ url });
+  });
 
-    const authRes = await fetch(`https://github.com/login/oauth/access_token`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
-
-    const authData = await authRes.json();
-
-    const { access_token } = authData as { access_token: string };
-
-    const githubUserRes = await fetch('https://api.github.com/user', {
-      method: 'GET',
-      headers: {
-        Authorization: 'Bearer ' + access_token,
-      },
-    });
-
-    const socialLoginData = (await githubUserRes.json()) as {
-      name: string;
-      id: number;
-      avatar_url: string;
-    };
-    const { name, avatar_url, id: provider_id } = socialLoginData;
-
-    const { data: exist } = await supabase
-      .from('social_users')
-      .select('user_id, id')
-      .eq('provider_id', provider_id.toString())
-      .eq('provider_name', 'github')
-      .single();
-
-    let userRes;
-    if (exist) {
-      userRes = await supabase
-        .from('users')
-        .upsert({
-          id: exist.user_id,
-          username: name,
-          avatar_url: avatar_url,
-        })
-        .select()
-        .single();
-    } else {
-      userRes = await supabase
-        .from('users')
-        .insert({
-          username: name,
-          avatar_url: avatar_url,
-        })
-        .select()
-        .single();
-    }
-
-    const { data: userData, error: userError } = userRes;
-
-    if (userError) {
-      return errorResponse(res, 500, userError.message);
-    }
-
-    const { error: socialError } = await supabase.from('social_users').upsert(
-      {
-        user_id: userData.id,
-        provider_id: provider_id.toString(),
-        provider_name: 'github',
-      },
-      { onConflict: 'provider_id' }
-    );
-
-    if (socialError) {
-      return errorResponse(res, 500, socialError.message);
-    }
-
-    const { error: userInfoError } = await supabase
-      .from('user_infos')
-      .upsert({ id: userData.id });
-
-    if (userInfoError) {
-      return errorResponse(res, 500, userInfoError.message);
-    }
-
-    const accessToken = jwt.sign(
-      {
-        username: userData.username,
-        id: userData.id,
-      },
-      JWT_SECRET,
-      {
-        issuer: 'walkey',
-        expiresIn: ONE_WEEK,
-      }
-    );
-    res.cookie('walkey_access_token', accessToken, {
-      httpOnly: true,
-    });
-
-    successResponse(res, 200, '성공적으로 로그인 되었습니다.');
+  static getKakaoUrl = asyncHandler(async (req: Request, res: Response) => {
+    const clientId = process.env.AUTH_KAKAO_CLIENT_ID;
+    const redirectUri = 'http://localhost:3000/api/auth/callback/kakao';
+    const responseType = 'code';
+    const url =
+      `https://kauth.kakao.com/oauth/authorize` +
+      `?client_id=${clientId}` +
+      `&redirect_uri=${redirectUri}` +
+      `&response_type=${responseType}`;
+    res.json({ url });
   });
 
   /**

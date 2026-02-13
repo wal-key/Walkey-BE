@@ -61,31 +61,17 @@
         <!-- 소셜 로그인 테스트 섹션 -->
         <section class="test-section">
           <h2>소셜 로그인 테스트</h2>
-          <button
-            onClick="location.href='https://github.com/login/oauth/authorize?client_id=Ov23li1UwRcARwdj1Tg3&scope=user:email user:name user:login'"
-            class="btn btn-primary"
-          >
+          <button onClick="githubSignin()" class="btn btn-primary">
             Github 로그인
           </button>
-          <button
-            onClick="location.href='https://accounts.google.com/o/oauth2/v2/auth?response_type=code&scope=profile&client_id=341604219706-jntqmhhvd9snjl41qhn4lnf72urqjpbm.apps.googleusercontent.com&redirect_uri=http://localhost:3000/api/auth/callback/google'"
-            class="btn btn-primary"
-          >
+          <button onClick="googleSignin()" class="btn btn-primary">
             Google 로그인
           </button>
-
-          <button
-            onClick="location.href='https://kauth.kakao.com/oauth/authorize?client_id=8b28978d8eeed4d06669155739914409&redirect_uri=http://localhost:3000/api/auth/login/kakao&response_type=code'"
-            class="btn btn-primary"
-          >
-            kakao 로그인
-          </button>
-
-          <button
-                  onClick="naverLogin()"
-                  class="btn btn-primary"
-          >
+          <button onClick="naverSignin()" class="btn btn-primary">
             Naver 로그인
+          </button>
+          <button onClick="kakaoSignin()" class="btn btn-primary">
+            Kakao 로그인
           </button>
           <div id="connection-result" class="result-box"></div>
         </section>
