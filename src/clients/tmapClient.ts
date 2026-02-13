@@ -1,4 +1,5 @@
 import axios from 'axios';
+import config from '../config';
 
 export interface LatLng {
   lat: number;
@@ -69,7 +70,7 @@ export class TmapClient {
       },
       {
         headers: {
-          appKey: process.env.TMAP_API_KEY!,
+          appKey: config.external.tmapApiKey,
           'Content-Type': 'application/json',
         },
       }

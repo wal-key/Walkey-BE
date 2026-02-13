@@ -1,16 +1,16 @@
 import express from 'express';
 import AuthController from '../controllers/authController';
-import AuthNaverController from '../controllers/authNaverController';
-import OAuthController from '../controllers/oauthController';
+import OAuthController from '../controllers/oAuthController';
 
 const router = express.Router();
 
-// 로그인
+// 이메일/비밀번호 로그인
 router.post('/login', AuthController.login);
-router.route('/callback/:provider').get(OAuthController.handlerOauthCallback);
 
-// 네이버
-router.get('/callback/naver', AuthNaverController.naverLogin);
+// OAuth 로그인 URL 조회
 router.get('/signin/:provider', AuthController.getSigninUrl);
+
+// OAuth 콜백 (Google, GitHub, Naver, Kakao 통합)
+router.get('/callback/:provider', OAuthController.handleOAuthCallback);
 
 export default router;

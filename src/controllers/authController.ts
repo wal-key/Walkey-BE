@@ -1,145 +1,41 @@
-import 'dotenv/config';
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import User from '../models/userModel';
+import { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler';
-import { successResponse, errorResponse } from '../utils/response';
-const JWT_SECRET = process.env.JWT_SECRET || '';
+import { successResponse } from '../utils/response';
+import { AuthService } from '../services/authService';
+import { OAuthStrategyFactory } from '../services/OAuthService';
+import { BadRequestError } from '../errors/AppError';
+
+/**
+ * 인증 컨트롤러 (Thin Controller Pattern)
+ *
+ * [패턴: Thin Controller]
+ * 컨트롤러의 책임을 "입력 파싱 → 서비스 호출 → 응답 반환"으로 제한합니다.
+ * 모든 비즈니스 로직은 AuthService에 위임됩니다.
+ *
+ * [효과]
+ * 1. 컨트롤러가 얇아져서 가독성과 유지보수성이 향상
+ * 2. 비즈니스 로직을 서비스 레이어에서 독립적으로 테스트 가능
+ * 3. HTTP 관심사(req/res)와 도메인 로직의 명확한 분리
+ */
 class AuthController {
-  static getSigninUrl = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-      const { provider } = req.params;
-      switch (provider) {
-        case 'google':
-          return this.getGoogleUrl(req, res, next);
-        case 'github':
-          return this.getGithubUrl(req, res, next);
-        case 'naver':
-          return this.getNaverUrl(req, res, next);
-        case 'kakao':
-        default:
-          return this.getKakaoUrl(req, res, next);
-      }
+  /** OAuth 로그인 URL 조회 */
+  static getSigninUrl = asyncHandler(async (req: Request, res: Response) => {
+    const provider = req.params.provider as string;
+
+    if (!OAuthStrategyFactory.isValidProvider(provider)) {
+      throw new BadRequestError(`지원하지 않는 OAuth 제공자입니다: ${provider}`);
     }
-  );
 
-  static getGithubUrl = asyncHandler(async (req: Request, res: Response) => {
-    const clientId = process.env.AUTH_GITHUB_CLIENT_ID;
-    const redirectUri = 'http://localhost:3000/api/auth/callback/github';
-    const scope = 'email user:name user:login';
-
-    const url =
-      `https://github.com/login/oauth/authorize` +
-      `?client_id=${clientId}` +
-      `&redirect_uri=${redirectUri}` +
-      `&scope=${scope}`;
-    res.json({ url });
+    const url = AuthService.getSigninUrl(provider);
+    return successResponse(res, 200, { url });
   });
 
-  static getGoogleUrl = asyncHandler(async (req: Request, res: Response) => {
-    const clientId = process.env.AUTH_GOOGLE_CLIENT_ID;
-    const scope = 'profile';
-    const redirectUri = 'http://localhost:3000/api/auth/callback/google';
-    const responseType = 'code';
-    const url =
-      `https://accounts.google.com/o/oauth2/v2/auth` +
-      `?response_type=${responseType}` +
-      `&client_id=${clientId}` +
-      `&redirect_uri=${redirectUri}` +
-      `&scope=${scope}`;
-    res.json({ url });
+  /** 이메일/비밀번호 로그인 */
+  static login = asyncHandler(async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    const result = await AuthService.login(email, password);
+    return successResponse(res, 200, result, '로그인 성공');
   });
-
-  static getNaverUrl = asyncHandler(async (req: Request, res: Response) => {
-    const clientId = process.env.AUTH_NAVER_CLIENT_ID;
-    const redirectUri = 'http://localhost:3000/api/auth/callback/naver';
-    const state = Math.random().toString(36).substring(2, 15);
-    const responseType = 'code';
-
-    const url =
-      `https://nid.naver.com/oauth2.0/authorize` +
-      `?response_type=${responseType}` +
-      `&client_id=${clientId}` +
-      `&redirect_uri=${redirectUri}` +
-      `&state=${state}`;
-    res.json({ url });
-  });
-
-  static getKakaoUrl = asyncHandler(async (req: Request, res: Response) => {
-    const clientId = process.env.AUTH_KAKAO_CLIENT_ID;
-    const redirectUri = 'http://localhost:3000/api/auth/callback/kakao';
-    const responseType = 'code';
-    const url =
-      `https://kauth.kakao.com/oauth/authorize` +
-      `?client_id=${clientId}` +
-      `&redirect_uri=${redirectUri}` +
-      `&response_type=${responseType}`;
-    res.json({ url });
-  });
-
-  /**
-   * 로그인
-   * POST /api/auth/login
-   */
-  static login = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-      const { email, password } = req.body;
-
-      // 1. 입력값 검증
-      if (!email || !password) {
-        return errorResponse(
-          res,
-          400,
-          '이메일과 비밀번호를 모두 입력해주세요.'
-        );
-      }
-
-      // 2. 사용자 조회
-      const user = await User.findByEmail(email);
-      if (!user) {
-        return errorResponse(
-          res,
-          401,
-          '이메일 또는 비밀번호가 올바르지 않습니다.'
-        );
-      }
-
-      // 3. 비밀번호 검증
-      // 주의: user.password 컬럼명은 DB 스키마에 따름 (Note: users table might have password column, handled as string)
-      const isMatch = await User.verifyPassword(
-        password,
-        user.password as string
-      );
-      if (!isMatch) {
-        return errorResponse(
-          res,
-          401,
-          '이메일 또는 비밀번호가 올바르지 않습니다.'
-        );
-      }
-
-      // 4. JWT 토큰 생성
-      const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
-        expiresIn: '24h',
-      });
-
-      // 5. 응답
-      return successResponse(
-        res,
-        200,
-        {
-          token,
-          user: {
-            id: user.id,
-            email: user.email,
-            username: user.username,
-            avatar_url: user.avatar_url,
-          },
-        },
-        '로그인 성공'
-      );
-    }
-  );
 }
 
 export default AuthController;
