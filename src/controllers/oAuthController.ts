@@ -15,24 +15,30 @@ import { issueJWT } from '../utils/jwtUtils';
 const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
 
 class OAuthController {
+  static providerHandlers = (): {
+    [key: string]: (req: Request, res: Response, next: NextFunction) => void;
+  } => {
+    return {
+      google: OAuthController.googleSignin,
+      github: OAuthController.githubSignin,
+      naver: OAuthController.naverSignin,
+      kakao: OAuthController.kakaoSignin,
+    };
+  };
   static handlerOauthCallback = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
       const { provider } = req.params;
-      switch (provider) {
-        case 'google':
-          this.googleSignin(req, res, next);
-          break;
-        case 'github':
-          this.githubSignin(req, res, next);
-          break;
-        case 'naver':
-          this.naverSignin(req, res, next);
-          break;
-        case 'kakao':
-        default:
-          this.kakaoSignin(req, res, next);
-          break;
+      const handler = this.providerHandlers()[provider as string];
+
+      if (!handler) {
+        return errorResponse(
+          res,
+          400,
+          `지원하지 않는 OAuth 제공자입니다: ${provider}`
+        );
       }
+
+      await handler(req, res, next);
     }
   );
 
@@ -49,7 +55,7 @@ class OAuthController {
     if (!profile) {
       return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
     }
-    return this.completeOAuthSignin(res, profile);
+    await this.completeOAuthSignin(res, profile);
   });
 
   static githubSignin = asyncHandler(async (req: Request, res: Response) => {
@@ -67,7 +73,7 @@ class OAuthController {
       return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
     }
 
-    this.completeOAuthSignin(res, profile);
+    await this.completeOAuthSignin(res, profile);
   });
 
   static naverSignin = asyncHandler(async (req: Request, res: Response) => {
@@ -160,7 +166,7 @@ class OAuthController {
       httpOnly: true,
     });
 
-    successResponse(res, 200, '성공적으로 로그인 되었습니다.');
+    return successResponse(res, 200, '성공적으로 로그인 되었습니다.');
   };
 }
 
