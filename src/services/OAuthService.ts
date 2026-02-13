@@ -43,8 +43,8 @@ export class naverOAuth {
   static async getToken(code: string, state: string) {
     const params = {
       grant_type: 'authorization_code',
-      client_id: process.env.NAVER_CLIENT_ID,
-      client_secret: process.env.NAVER_CLIENT_SECRET,
+      client_id: process.env.AUTH_NAVER_CLIENT_ID,
+      client_secret: process.env.AUTH_NAVER_CLIENT_SECRET,
       code,
       state,
     };

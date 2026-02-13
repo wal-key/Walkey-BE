@@ -51,7 +51,7 @@ class AuthController {
   });
 
   static getNaverUrl = asyncHandler(async (req: Request, res: Response) => {
-    const clientId = process.env.NAVER_CLIENT_ID;
+    const clientId = process.env.AUTH_NAVER_CLIENT_ID;
     const redirectUri = 'http://localhost:3000/api/auth/callback/naver';
     const state = Math.random().toString(36).substring(2, 15);
     const responseType = 'code';
