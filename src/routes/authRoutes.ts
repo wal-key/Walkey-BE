@@ -1,23 +1,16 @@
 import express from 'express';
 import AuthController from '../controllers/authController';
 import AuthNaverController from '../controllers/authNaverController';
-import { authCookieParser } from '../middleware/auth';
+import OAuthController from '../controllers/oauthController';
 
-import AuthKakaoController from '../controllers/authKakaoController';
-
-const authRouter = express.Router();
+const router = express.Router();
 
 // 로그인
-authRouter.post('/login', AuthController.login);
-
-authRouter.get('/login/github', AuthController.githubLogin);
-authRouter.route('/callback/google').get(AuthController.googleSignin);
+router.post('/login', AuthController.login);
+router.route('/callback/:provider').get(OAuthController.handlerOauthCallback);
 
 // 네이버
-authRouter.get('/login/naver', AuthNaverController.getNaverUrl);
+router.get('/callback/naver', AuthNaverController.naverLogin);
+router.get('/signin/:provider', AuthController.getSigninUrl);
 
-authRouter.get('/login/kakao', AuthKakaoController.kakaoLogin);
-
-authRouter.get('/callback/naver', AuthNaverController.naverLogin);
-
-export default authRouter;
+export default router;

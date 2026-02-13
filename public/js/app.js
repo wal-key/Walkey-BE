@@ -63,17 +63,31 @@ async function getTables() {
 /**
  * github 로그인
  */
-async function githubLogin() {
-  const endpoint = '/';
-  const token = await fetchAPI('/users/signin/github');
+async function githubSignin() {
+  const data = await fetch('/api/auth/signin/github').then((res) => res.json());
+  window.location.href = data.url;
+}
+
+/**
+ * google 로그인
+ */
+async function googleSignin() {
+  const data = await fetch('/api/auth/signin/google').then((res) => res.json());
+  window.location.href = data.url;
 }
 
 /**
  * naver 로그인
  */
-async function naverLogin() {
-  const data = await fetch('/api/auth/login/naver').then((res) => res.json());
-
+async function naverSignin() {
+  const data = await fetch('/api/auth/signin/naver').then((res) => res.json());
+  window.location.href = data.url;
+}
+/**
+ * naver 로그인
+ */
+async function kakaoSignin() {
+  const data = await fetch('/api/auth/signin/kakao').then((res) => res.json());
   window.location.href = data.url;
 }
 
