@@ -6,8 +6,8 @@ import path from 'path';
 import config from './config';
 import routes from './routes';
 import cookieParser from 'cookie-parser';
-import { notFound, errorHandler } from './middleware/errorHandler';
-import { authCookieParser, requireAuth } from './middleware/auth';
+import { notFound, errorHandler } from './middleware/errorMiddleware';
+import { authCookieParser, requireAuth } from './middleware/authMiddleware';
 import authRouter from './routes/authRoutes';
 
 const app = express();
@@ -76,7 +76,7 @@ if (config.server.env === 'development') {
 // 전역 쿠키 파서
 app.use(cookieParser());
 app.use(authCookieParser);
-
+authRouter;
 // API 라우트
 app.use('/api/auth', authRouter);
 app.use('/api', requireAuth, routes);

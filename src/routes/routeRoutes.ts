@@ -1,9 +1,9 @@
 import express from 'express';
-import RouteController from '../controllers/routeController';
+import WorkRouteController from '../controllers/WorkRouteController';
 
 const router = express.Router();
 
 // 산책 루트 목록 조회
-router.get('/', RouteController.getRecommendedRoutes);
+router.get('/', WorkRouteController.getRecommendedRoutes);
 
 export default router;
