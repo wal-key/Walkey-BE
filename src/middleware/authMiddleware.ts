@@ -13,18 +13,12 @@ declare global {
   }
 }
 
-interface JwtPayload {
-  userId: string;
-  iat: number;
-  exp: number;
-}
-
 /**
  * 1모든 요청에서 실행
  * - 토큰이 있으면 해석해서 req.user에 저장
  * - 절대 막지 않음
  */
-export const authCookieParser = (
+export const parseJwtUser = (
   req: Request,
   res: Response,
   next: NextFunction
