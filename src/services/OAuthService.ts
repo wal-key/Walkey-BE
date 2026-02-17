@@ -48,9 +48,15 @@ export class naverOAuth {
       code,
       state,
     };
+
     const tokenUrl = 'https://nid.naver.com/oauth2.0/token';
+    // TODO 확인 필요
     return await axios
-      .post(tokenUrl, JSON.stringify(params))
+      .post(tokenUrl, params, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
       .then((res) => res.data.access_token);
   }
 
@@ -64,11 +70,13 @@ export class naverOAuth {
     if (profileData.error) {
       return null;
     }
+
+    // TODO 확인필요
     const userData = {
-      username: profileData.name,
-      providerId: profileData.id,
+      username: profileData.response.name,
+      providerId: profileData.response.id,
       providerName: 'naver',
-      avatarUrl: profileData.profile_image,
+      avatarUrl: profileData.response.profile_image,
     };
     return userData;
   }

@@ -62,7 +62,7 @@ Walkey-BE/
 │   │   ├── authKakaoController.ts # 카카오 OAuth (별도 파일)
 │   │   ├── authNaverController.ts # 네이버 OAuth (별도 파일)
 │   │   ├── userController.ts      # 회원가입, 로그인, 세션 생성, 산책 내역 조회
-│   │   ├── routeController.ts     # 추천 루트 조회
+│   │   ├── WorkRouteController.ts     # 추천 루트 조회
 │   │   ├── themeController.ts     # 테마 목록 조회
 │   │   ├── adminController.ts     # 관리자 CRUD (테마/루트/유저)
 │   │   └── databaseController.ts  # DB 연결 테스트 + 레거시 조회 API
@@ -75,8 +75,8 @@ Walkey-BE/
 │   │   ├── userInfoModel.ts   # 사용자 상세정보 (Supabase 전용)
 │   │   └── routeModel.ts      # 산책 루트 조회/수정 (Prisma)
 │   ├── middleware/
-│   │   ├── errorHandler.ts    # 404 핸들러 + 전역 에러 핸들러
-│   │   └── validate.ts        # express-validator 결과 검사 미들웨어
+│   │   ├── errorMiddleware.ts    # 404 핸들러 + 전역 에러 핸들러
+│   │   └── validateMiddlewareMiddleware.ts        # express-validator 결과 검사 미들웨어
 │   └── utils/
 │       ├── asyncHandler.ts    # async/await try-catch 래퍼
 │       ├── response.ts        # 통일된 응답 포맷 (successResponse, errorResponse)
@@ -227,7 +227,7 @@ Client Request
 
 | Method | Path                     | Handler                                | 설명                                        |
 | ------ | ------------------------ | -------------------------------------- | ------------------------------------------- |
-| GET    | `/routes?theme=N&time=N` | `RouteController.getRecommendedRoutes` | 테마ID + 소요시간 기반 추천 루트 (최대 5개) |
+| GET    | `/routes?theme=N&time=N` | `WorkRouteController.getRecommendedRoutes` | 테마ID + 소요시간 기반 추천 루트 (최대 5개) |
 
 ### 관리자 (`/api/admin`)
 
@@ -281,7 +281,7 @@ server.ts
   ├── 6. [dev only] 요청 로깅
   ├── 7. routes → /api/*
   ├── 8. notFound 핸들러 (404)
-  └── 9. errorHandler (전역 에러 핸들러)
+  └── 9. errorMiddleware (전역 에러 핸들러)
 ```
 
 ### 3. 추천 루트 조회 플로우
@@ -289,9 +289,9 @@ server.ts
 ```
 GET /api/routes?theme=1&time=30
   │
-  ├── routeRoutes.ts → RouteController.getRecommendedRoutes
+  ├── routeRoutes.ts → WorkRouteController.getRecommendedRoutes
   │
-  ├── RouteController (controllers/routeController.ts)
+  ├── WorkRouteController (controllers/WorkRouteController.ts)
   │    ├── query 파라미터 파싱 & 검증 (theme, time → Number)
   │    └── RouteService.getRecommendedRoutes(themeId, walkTime) 호출
   │

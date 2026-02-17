@@ -2,7 +2,7 @@ import { RouteService } from '../services/routeService';
 import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../utils/response';
 
-export class RouteController {
+export class WorkRouteController {
   /**
    * 산책 루트 목록 조회 (필터링 지원)
    */
@@ -25,4 +25,4 @@ export class RouteController {
   }
 }
 
-export default RouteController;
+export default WorkRouteController;
