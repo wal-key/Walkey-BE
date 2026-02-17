@@ -1,5 +1,5 @@
 import express from 'express';
-import WorkRouteController from '../controllers/WorkRouteController';
+import WorkRouteController from '../controllers/workRouteController';
 
 const router = express.Router();
 
