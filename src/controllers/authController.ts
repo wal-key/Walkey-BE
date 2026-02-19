@@ -25,7 +25,7 @@ class AuthController {
 
   static getGithubUrl = asyncHandler(async (req: Request, res: Response) => {
     const clientId = process.env.AUTH_GITHUB_CLIENT_ID;
-    const redirectUri = 'http://localhost:3000/api/auth/callback/github';
+    const redirectUri = `http://${process.env.SERVER_BASE_URL}/api/auth/callback/github`;
     const scope = 'email user:name user:login';
 
     const url =
@@ -39,7 +39,7 @@ class AuthController {
   static getGoogleUrl = asyncHandler(async (req: Request, res: Response) => {
     const clientId = process.env.AUTH_GOOGLE_CLIENT_ID;
     const scope = 'profile';
-    const redirectUri = 'http://localhost:3000/api/auth/callback/google';
+    const redirectUri = `http://${process.env.SERVER_BASE_URL}/api/auth/callback/google`;
     const responseType = 'code';
     const url =
       `https://accounts.google.com/o/oauth2/v2/auth` +
@@ -52,7 +52,7 @@ class AuthController {
 
   static getNaverUrl = asyncHandler(async (req: Request, res: Response) => {
     const clientId = process.env.AUTH_NAVER_CLIENT_ID;
-    const redirectUri = 'http://localhost:3000/api/auth/callback/naver';
+    const redirectUri = `http://${process.env.SERVER_BASE_URL}/api/auth/callback/naver`;
     const state = Math.random().toString(36).substring(2, 15);
     const responseType = 'code';
 
@@ -67,7 +67,7 @@ class AuthController {
 
   static getKakaoUrl = asyncHandler(async (req: Request, res: Response) => {
     const clientId = process.env.AUTH_KAKAO_CLIENT_ID;
-    const redirectUri = 'http://localhost:3000/api/auth/callback/kakao';
+    const redirectUri = `http://${process.env.SERVER_BASE_URL}/api/auth/callback/kakao`;
     const responseType = 'code';
     const url =
       `https://kauth.kakao.com/oauth/authorize` +
