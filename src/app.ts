@@ -95,7 +95,7 @@ app.use(cookieParser());
 app.use(parseJwtUser);
 app.use('/api/auth', authRouter);
 
-app.use(requireAuth);
+// app.use(requireAuth);
 app.use('/api', routes);
 
 // 404 에러 핸들러
