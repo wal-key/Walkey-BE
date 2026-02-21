@@ -25,55 +25,83 @@ class AuthController {
 
   static getGithubUrl = asyncHandler(async (req: Request, res: Response) => {
     const clientId = process.env.AUTH_GITHUB_CLIENT_ID;
-    const redirectUri = `http://${process.env.SERVER_BASE_URL}/api/auth/callback/github`;
+    const redirectUri = `${process.env.SERVER_BASE_URL}/api/auth/callback/github`;
     const scope = 'email user:name user:login';
+
+    const clientRedirectUri =
+      (req.query.redirect_uri as string) ?? process.env.CLIENT_BASE_URL!;
+    const state = Buffer.from(
+      JSON.stringify({ redirectUri: clientRedirectUri })
+    ).toString('base64');
 
     const url =
       `https://github.com/login/oauth/authorize` +
       `?client_id=${clientId}` +
       `&redirect_uri=${redirectUri}` +
-      `&scope=${scope}`;
+      `&scope=${scope}` +
+      `&state=${encodeURIComponent(state)}`;
     res.json({ url });
   });
 
   static getGoogleUrl = asyncHandler(async (req: Request, res: Response) => {
     const clientId = process.env.AUTH_GOOGLE_CLIENT_ID;
     const scope = 'profile';
-    const redirectUri = `http://${process.env.SERVER_BASE_URL}/api/auth/callback/google`;
+    const redirectUri = `${process.env.SERVER_BASE_URL}/api/auth/callback/google`;
     const responseType = 'code';
+
+    const clientRedirectUri =
+      (req.query.redirect_uri as string) ?? process.env.CLIENT_BASE_URL!;
+    const state = Buffer.from(
+      JSON.stringify({ redirectUri: clientRedirectUri })
+    ).toString('base64');
+
     const url =
       `https://accounts.google.com/o/oauth2/v2/auth` +
       `?response_type=${responseType}` +
       `&client_id=${clientId}` +
       `&redirect_uri=${redirectUri}` +
-      `&scope=${scope}`;
+      `&scope=${scope}` +
+      `&state=${encodeURIComponent(state)}`;
     res.json({ url });
   });
 
   static getNaverUrl = asyncHandler(async (req: Request, res: Response) => {
     const clientId = process.env.AUTH_NAVER_CLIENT_ID;
-    const redirectUri = `http://${process.env.SERVER_BASE_URL}/api/auth/callback/naver`;
-    const state = Math.random().toString(36).substring(2, 15);
+    const redirectUri = `${process.env.SERVER_BASE_URL}/api/auth/callback/naver`;
     const responseType = 'code';
+
+    const clientRedirectUri =
+      (req.query.redirect_uri as string) ?? process.env.CLIENT_BASE_URL!;
+    const state = Buffer.from(
+      JSON.stringify({ redirectUri: clientRedirectUri })
+    ).toString('base64');
 
     const url =
       `https://nid.naver.com/oauth2.0/authorize` +
       `?response_type=${responseType}` +
       `&client_id=${clientId}` +
       `&redirect_uri=${redirectUri}` +
-      `&state=${state}`;
+      `&state=${encodeURIComponent(state)}`;
     res.json({ url });
   });
 
   static getKakaoUrl = asyncHandler(async (req: Request, res: Response) => {
     const clientId = process.env.AUTH_KAKAO_CLIENT_ID;
-    const redirectUri = `http://${process.env.SERVER_BASE_URL}/api/auth/callback/kakao`;
+    const redirectUri = `${process.env.SERVER_BASE_URL}/api/auth/callback/kakao`;
     const responseType = 'code';
+
+    const clientRedirectUri =
+      (req.query.redirect_uri as string) ?? process.env.CLIENT_BASE_URL!;
+    const state = Buffer.from(
+      JSON.stringify({ redirectUri: clientRedirectUri })
+    ).toString('base64');
+
     const url =
       `https://kauth.kakao.com/oauth/authorize` +
       `?client_id=${clientId}` +
       `&redirect_uri=${redirectUri}` +
-      `&response_type=${responseType}`;
+      `&response_type=${responseType}` +
+      `&state=${encodeURIComponent(state)}`;
     res.json({ url });
   });
 

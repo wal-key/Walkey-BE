@@ -55,7 +55,7 @@ class OAuthController {
     if (!profile) {
       return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
     }
-    await this.completeOAuthSignin(res, profile);
+    await this.completeOAuthSignin(req, res, profile);
   });
 
   static githubSignin = asyncHandler(async (req: Request, res: Response) => {
@@ -73,7 +73,7 @@ class OAuthController {
       return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
     }
 
-    await this.completeOAuthSignin(res, profile);
+    await this.completeOAuthSignin(req, res, profile);
   });
 
   static naverSignin = asyncHandler(async (req: Request, res: Response) => {
@@ -91,7 +91,7 @@ class OAuthController {
       return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
     }
 
-    await this.completeOAuthSignin(res, profile);
+    await this.completeOAuthSignin(req, res, profile);
   });
 
   static kakaoSignin = asyncHandler(async (req: Request, res: Response) => {
@@ -105,10 +105,11 @@ class OAuthController {
       return errorResponse(res, 500, '소셜 로그인 프로필 에러가 발생했습니다.');
     }
 
-    await this.completeOAuthSignin(res, profile);
+    await this.completeOAuthSignin(req, res, profile);
   });
 
   static completeOAuthSignin = async (
+    req: Request,
     res: Response,
     profile: {
       providerId: string;
@@ -166,10 +167,34 @@ class OAuthController {
       httpOnly: true,
     });
 
+    const adminOrigins = process.env.SERVER_BASE_URL;
+    const clientOrigins = process.env
+      .CLIENT_ORIGINS!.split(',')
+      .map((origin) => origin.trim());
+
+    let targetUrl = process.env.CLIENT_BASE_URL!;
+
+    try {
+      const rawState = req.query.state as string;
+      const decoded = JSON.parse(
+        Buffer.from(decodeURIComponent(rawState), 'base64').toString()
+      );
+
+      if (decoded.redirectUri) {
+        const origin = decoded.redirectUri.replace(/\/$/, '');
+
+        if (adminOrigins === origin) {
+          targetUrl = `${origin}/admin`;
+        } else if (clientOrigins.includes(origin)) {
+          targetUrl = `${origin}/walk-setup`;
+        }
+      }
+    } catch (err) {}
+
     // return successResponse(res, 200, '성공적으로 로그인 되었습니다.');
 
     // TODO 확인필요 -> 프론트에서 사용 시 redirect 링크 연결
-    return res.redirect(process.env.CLIENT_BASE_URL!);
+    return res.redirect(targetUrl);
   };
 }
 

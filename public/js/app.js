@@ -64,7 +64,9 @@ async function getTables() {
  * github 로그인
  */
 async function githubSignin() {
-  const data = await fetch('/api/auth/signin/github').then((res) => res.json());
+  const data = await fetch(
+    `/api/auth/signin/github?redirect_uri=${window.location.origin}`
+  ).then((res) => res.json());
   window.location.href = data.url;
 }
 
@@ -72,7 +74,9 @@ async function githubSignin() {
  * google 로그인
  */
 async function googleSignin() {
-  const data = await fetch('/api/auth/signin/google').then((res) => res.json());
+  const data = await fetch(
+    `/api/auth/signin/google?redirect_uri=${window.location.origin}`
+  ).then((res) => res.json());
   window.location.href = data.url;
 }
 
@@ -80,14 +84,19 @@ async function googleSignin() {
  * naver 로그인
  */
 async function naverSignin() {
-  const data = await fetch('/api/auth/signin/naver').then((res) => res.json());
+  const data = await fetch(
+    `/api/auth/signin/naver?redirect_uri=${window.location.origin}`
+  ).then((res) => res.json());
   window.location.href = data.url;
 }
+
 /**
- * naver 로그인
+ * 카카오 로그인
  */
 async function kakaoSignin() {
-  const data = await fetch('/api/auth/signin/kakao').then((res) => res.json());
+  const data = await fetch(
+    `/api/auth/signin/kakao?redirect_uri=${window.location.origin}`
+  ).then((res) => res.json());
   window.location.href = data.url;
 }
 

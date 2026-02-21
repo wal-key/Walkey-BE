@@ -89,7 +89,7 @@ export class kakaoOAuth {
     params.append('client_secret', process.env.AUTH_KAKAO_SECRET || '');
     params.append(
       'redirect_uri',
-      `http://${process.env.SERVER_BASE_URL}/api/auth/callback/kakao`
+      `${process.env.SERVER_BASE_URL}/api/auth/callback/kakao`
     );
     params.append('code', code as string);
 
@@ -132,7 +132,7 @@ export class googleOAuth {
       client_id: process.env.AUTH_GOOGLE_CLIENT_ID,
       client_secret: process.env.AUTH_GOOGLE_SECRET,
       code: code,
-      redirect_uri: `http://${process.env.SERVER_BASE_URL}/api/auth/callback/google`,
+      redirect_uri: `${process.env.SERVER_BASE_URL}/api/auth/callback/google`,
       grant_type: 'authorization_code',
     };
     const tokenUrl = 'https://oauth2.googleapis.com/token';
