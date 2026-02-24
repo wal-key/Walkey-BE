@@ -164,6 +164,7 @@ class OAuthController {
     //JWT 쿠키에 삽입
     res.cookie('walkey_access_token', accessToken, {
       httpOnly: true,
+      sameSite: 'none',
     });
 
     const adminOrigins = process.env.SERVER_BASE_URL;
