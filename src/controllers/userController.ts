@@ -3,8 +3,8 @@ import prisma from '../lib/prisma';
 import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse, errorResponse } from '../utils/response';
 import User from '../models/userModel';
-import bcrypt from 'bcrypt';
 import { validate as uuidValidate } from 'uuid';
+import { userService } from '../services/userService';
 
 class UserController {
   /**
@@ -81,6 +81,31 @@ class UserController {
   );
 
   /**
+   * 사용자 정보
+   */
+  static getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return errorResponse(res, 401, '로그인이 필요합니다.');
+    }
+
+    const user = await userService.getCurrentUser(userId);
+
+    if (!user) {
+      return errorResponse(res, 404, '사용자를 찾을 수 없습니다.');
+    }
+
+    return successResponse(res, 200, {
+      user: {
+        id: user.id,
+        username: user.username,
+        avatar_url: user.avatar_url,
+      },
+    });
+  });
+
+  /**
    * 사용자의 산책 내역 조회
    */
   static getUserSessions = asyncHandler(async (req: Request, res: Response) => {
@@ -128,70 +153,6 @@ class UserController {
       },
       '산책 내역 조회 성공'
     );
-  });
-
-  //로그인
-  static signin = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-    //검증 절차
-    //이메일 검증
-    if (!email || typeof email !== 'string') {
-      errorResponse(res, 400, '아이디 또는 비밀번호가 올바르지 않습니다.');
-      return;
-    }
-    const userInfo = await prisma.userInfo.findUnique({
-      where: { email },
-    });
-    if (!userInfo) {
-      errorResponse(res, 404, '회원정보가 잘못 되었습니다.');
-      return;
-    }
-    //비번 검증
-    if (!password || password !== userInfo?.password) {
-      errorResponse(res, 400, '아이디 또는 비밀번호가 올바르지 않습니다.');
-      return;
-    }
-
-    successResponse(
-      res,
-      200,
-      `${userInfo?.email}님 성공적으로 로그인되었습니다.`
-    );
-  });
-
-  /**
-   * 회원 가입
-   */
-  static signup = asyncHandler(async (req: Request, res: Response) => {
-    const { username, email, password, avatar_url } = req.body;
-
-    // 1. 중복 확인
-    const [existingEmail, existingUsername] = await Promise.all([
-      prisma.userInfo.findUnique({ where: { email } }),
-      prisma.user.findFirst({ where: { username } }),
-    ]);
-
-    if (existingEmail) {
-      return errorResponse(res, 400, '이미 가입된 이메일입니다.');
-    }
-
-    if (existingUsername) {
-      return errorResponse(res, 400, '이미 사용 중인 사용자 이름입니다.');
-    }
-
-    // 2. 비밀번호 해싱
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // 3. 사용자 생성
-    const newUser = await User.upsert({
-      username,
-      avatarUrl:
-        avatar_url ||
-        `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
-      email,
-    });
-
-    return successResponse(res, 201, newUser, '회원가입 성공');
   });
 }
 
