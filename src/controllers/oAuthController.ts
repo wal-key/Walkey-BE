@@ -155,8 +155,7 @@ class OAuthController {
     //JWT 토큰 발행
     const accessToken = issueJWT(
       {
-        username: userData.username,
-        id: userData.id,
+        userId: userData.id,
       },
       'walkey',
       ONE_WEEK

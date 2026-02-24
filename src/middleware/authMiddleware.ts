@@ -6,8 +6,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: {
-        id: string | number;
-        name: string;
+        userId: string;
       };
     }
   }
@@ -32,13 +31,11 @@ export const parseJwtUser = (
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
-      id: string;
-      name: string;
+      userId: string;
     };
 
     req.user = {
-      id: decoded.id,
-      name: decoded.name,
+      userId: decoded.userId,
     };
   } catch (err) {
     req.user = undefined;

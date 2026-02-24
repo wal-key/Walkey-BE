@@ -147,7 +147,7 @@ class AuthController {
       }
 
       // 4. JWT 토큰 생성
-      const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+      const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
         expiresIn: '24h',
       });
 
