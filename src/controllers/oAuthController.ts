@@ -190,9 +190,6 @@ class OAuthController {
       }
     } catch (err) {}
 
-    // return successResponse(res, 200, '성공적으로 로그인 되었습니다.');
-
-    // TODO 확인필요 -> 프론트에서 사용 시 redirect 링크 연결
     return res.redirect(targetUrl);
   };
 }
