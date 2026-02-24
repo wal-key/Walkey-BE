@@ -1,0 +1,51 @@
+import { Request, Response } from 'express';
+import prisma from '../lib/prisma';
+import { asyncHandler } from '../utils/asyncHandler';
+import { successResponse, errorResponse } from '../utils/response';
+
+class UserSessionController {
+  /**
+   * 사용자의 모든 산책 기록 조회
+   * GET /api/users/sessions
+   */
+  static getUserSessions = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return errorResponse(res, 401, '인증 정보가 없습니다.');
+    }
+
+    try {
+      // 1. 유저 존재 여부 확인
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        return errorResponse(res, 404, '사용자를 찾을 수 없습니다.');
+      }
+
+      // 2. 산책 기록(Sessions) 조회 (Routes 정보 포함)
+      const sessions = await prisma.session.findMany({
+        where: { user_id: userId },
+        include: {
+          route: true, // routes 테이블의 모든 컬럼 포함
+        },
+        orderBy: {
+          start_time: 'desc', // 최신순 정렬
+        },
+      });
+
+      return successResponse(res, 200, sessions, '산책 기록 조회 성공');
+    } catch (error) {
+      console.error('getUserSessions Error:', error);
+      return errorResponse(
+        res,
+        500,
+        '데이터베이스 조회 중 오류가 발생했습니다.'
+      );
+    }
+  });
+}
+
+export default UserSessionController;
