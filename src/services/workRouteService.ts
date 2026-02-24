@@ -1,9 +1,9 @@
-import { RouteModel } from '../models/routeModel';
+import { WorkRouteModel } from '../models/workRouteModel';
 import { TmapClient } from '../clients/tmapClient';
 
-export class RouteService {
+export class WorkRouteService {
   static async getRecommendedRoutes(themeId: number, walkTime: number) {
-    const routes = await RouteModel.findRoutesByFilter(themeId, walkTime);
+    const routes = await WorkRouteModel.findRoutesByFilter(themeId, walkTime);
 
     if (!routes.length) return [];
 
@@ -16,7 +16,7 @@ export class RouteService {
 
     const parsedSorted = sorted.map((route) => ({
       ...route,
-      paths: RouteService.parsePathStrings(route.paths),
+      paths: WorkRouteService.parsePathStrings(route.paths),
     }));
 
     await this.createDetailPaths(sorted);
@@ -41,7 +41,7 @@ export class RouteService {
       try {
         const tmapDetailPaths = await TmapClient.getPedestrianRoute(points);
 
-        await RouteModel.updateDetailPaths(routeId, tmapDetailPaths);
+        await WorkRouteModel.updateDetailPaths(routeId, tmapDetailPaths);
       } catch (error) {
         console.log(`${index}번 경로 Tmap 처리 실패`, error);
       }

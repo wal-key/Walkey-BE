@@ -1,6 +1,6 @@
 import prisma from '../lib/prisma';
 
-export class RouteModel {
+export class WorkRouteModel {
   /**
    * 테마, 소요시간에 맞는 산책 경로 목록을 조회한다.
    * 추천 경로를 제공하기 위한 API

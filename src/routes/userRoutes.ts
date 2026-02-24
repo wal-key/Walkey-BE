@@ -1,12 +1,8 @@
 import express from 'express';
 import UserController from '../controllers/userController';
 import UserSessionController from '../controllers/userSessionController';
-import { requireAuth } from '../middleware/authMiddleware';
 
 const router = express.Router();
-
-// 로그인
-router.post('/signin', UserController.signin);
 
 // 산책 세션 시작 (POST /api/users/sessions)
 router.post('/sessions', UserController.createUserSession);
