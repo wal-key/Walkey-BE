@@ -2,8 +2,6 @@ import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse, errorResponse } from '../utils/response';
-import { decodeJWT } from '../utils/jwtUtils';
-import User from '../models/userModel';
 import { supabase } from '../config/supabase';
 
 class UserSessionController {
@@ -33,13 +31,7 @@ class UserSessionController {
       return successResponse(res, 200, data, '성공적으로 수정이 되었습니다.');
     }
   );
-  /**
-   * 사용자의 산책 기록 삭제
-   * GET /api/users/sessions
-   */
-  static deleteUserSession = asyncHandler(
-    async (req: Request, res: Response) => {}
-  );
+
   /**
    * 사용자의 모든 산책 기록 조회
    * GET /api/users/sessions
