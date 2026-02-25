@@ -1,4 +1,4 @@
-import { RouteService } from '../services/routeService';
+import { WorkRouteService } from '../services/workRouteService';
 import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../utils/response';
 
@@ -16,7 +16,7 @@ export class WorkRouteController {
       return errorResponse(res, 400, '요청 형식이 올바르지 않습니다.');
     }
 
-    const routes = await RouteService.getRecommendedRoutes(
+    const routes = await WorkRouteService.getRecommendedRoutes(
       parsedTheme,
       parsedTime
     );

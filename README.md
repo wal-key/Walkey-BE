@@ -68,12 +68,12 @@ Walkey-BE/
 │   │   └── databaseController.ts  # DB 연결 테스트 + 레거시 조회 API
 │   ├── services/              # 비즈니스 로직 계층
 │   │   ├── OAuthService.ts    # OAuth 토큰 교환 및 프로필 조회 (GitHub/Google/Naver/Kakao)
-│   │   └── routeService.ts    # 추천 루트 필터링, T-Map 상세 경로 생성
+│   │   └── workRouteService.ts    # 추천 루트 필터링, T-Map 상세 경로 생성
 │   ├── models/                # 데이터 접근 계층
 │   │   ├── userModel.ts       # User CRUD (Prisma + Supabase 혼용)
 │   │   ├── socialUserModel.ts # 소셜 로그인 사용자 (Supabase 전용)
 │   │   ├── userInfoModel.ts   # 사용자 상세정보 (Supabase 전용)
-│   │   └── routeModel.ts      # 산책 루트 조회/수정 (Prisma)
+│   │   └── workRouteModel.ts      # 산책 루트 조회/수정 (Prisma)
 │   ├── middleware/
 │   │   ├── errorMiddleware.ts    # 404 핸들러 + 전역 에러 핸들러
 │   │   └── validateMiddlewareMiddleware.ts        # express-validator 결과 검사 미들웨어
@@ -293,10 +293,10 @@ GET /api/routes?theme=1&time=30
   │
   ├── WorkRouteController (controllers/WorkRouteController.ts)
   │    ├── query 파라미터 파싱 & 검증 (theme, time → Number)
-  │    └── RouteService.getRecommendedRoutes(themeId, walkTime) 호출
+  │    └── WorkRouteService.getRecommendedRoutes(themeId, walkTime) 호출
   │
-  ├── RouteService (services/routeService.ts)
-  │    ├── RouteModel.findRoutesByFilter(theme, time)
+  ├── WorkRouteService (services/workRouteService.ts)
+  │    ├── WorkRouteModel.findRoutesByFilter(theme, time)
   │    │    └── Prisma: route.findMany({ where: { theme_id, estimated_time 범위 } })
   │    ├── 결과를 시간 근접도 순으로 정렬
   │    ├── paths[] (JSON 문자열 배열) → JSON 객체 파싱
