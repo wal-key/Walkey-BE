@@ -2,8 +2,44 @@ import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse, errorResponse } from '../utils/response';
+import { decodeJWT } from '../utils/jwtUtils';
+import User from '../models/userModel';
+import { supabase } from '../config/supabase';
 
 class UserSessionController {
+  /**
+   * 사용자의 산책 기록 수정
+   * GET /api/users/sessions
+   */
+  static updateUserSession = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { session_id, end_time, actual_distance, actual_duration } =
+        req.body;
+      const { data, error } = await supabase
+        .from('sessions')
+        .update({
+          end_time,
+          actual_distance,
+          actual_duration,
+        })
+        .eq('id', session_id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error(error);
+        return errorResponse(res, 500, '세션 정보 업데이트 실패');
+      }
+      return successResponse(res, 200, data, '성공적으로 수정이 되었습니다.');
+    }
+  );
+  /**
+   * 사용자의 산책 기록 삭제
+   * GET /api/users/sessions
+   */
+  static deleteUserSession = asyncHandler(
+    async (req: Request, res: Response) => {}
+  );
   /**
    * 사용자의 모든 산책 기록 조회
    * GET /api/users/sessions
