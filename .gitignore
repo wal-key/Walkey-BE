@@ -4,7 +4,6 @@ build/
 out/
 
 .env
-.env.*
 .DS_Store
 
 /generated/prisma
